@@ -3,12 +3,12 @@
 import { useState, useEffect, Suspense } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, Film } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { apiService } from "@/lib/api-config";
 import { SearchBar } from "@/components/ui/searchbar";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import Navbar from "@/components/ui/navbar";
+import Paginator from "@/components/ui/paginator";
 
 export default function MoviesPage() {
   const router = useRouter();
@@ -16,24 +16,34 @@ export default function MoviesPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchType, setSearchType] = useState("movie");
+  const [page, setPage] = useState(1);
+  const [size] = useState(33); // items per page
+  const [total, setTotal] = useState(0);
+
+  const fetchMovies = async (newPage) => {
+    setLoading(true);
+    setPage(newPage);
+    try {
+      const response = await apiService.fetchData(`/movies?page=${newPage}&size=${size}`);
+      if (response.ok) {
+        const data = await response.json();
+        const sortedMovies = data.sort((a, b) => a.title.localeCompare(b.title));
+        setMovies(sortedMovies);
+      }
+      const totalResponse = await apiService.fetchData('/movies_count');
+      if (totalResponse.ok) {
+        const totalData = await totalResponse.json();
+        setTotal(totalData.total);
+      }
+    } catch (error) {
+      console.error('Failed to fetch movies:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        const response = await apiService.fetchData('/movies');
-        if (response.ok) {
-          const data = await response.json();
-          const sortedMovies = data.sort((a, b) => a.title.localeCompare(b.title));
-          setMovies(sortedMovies);
-        }
-      } catch (error) {
-        console.error('Failed to fetch movies:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMovies();
+    fetchMovies(1);
   }, []);
 
   const handleNavigation = (path) => {
@@ -66,7 +76,7 @@ export default function MoviesPage() {
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>🎬 All Movies</CardTitle>
-              <p className="text-gray-500 mt-2">({movies.length} movies)</p>
+              <p className="text-gray-500 mt-2">({total} movies)</p>
             </div>
             <div className="flex gap-4">
               <Button 
@@ -125,6 +135,12 @@ export default function MoviesPage() {
               </div>
             </div>
           )}
+          <Paginator
+            page={page}
+            total={total}
+            size={size}
+            onPageChange={fetchMovies}
+          />
         </CardContent>
       </Card>
       </div>

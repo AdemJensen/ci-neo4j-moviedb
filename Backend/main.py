@@ -168,9 +168,18 @@ async def read_actor(name: str):
     raise HTTPException(status_code=404, detail="Actor not found")
 
 @app.get("/actors", response_model=List[Actor])
-async def read_actors():
-    actors = matcher.match("Actor")
+async def read_actors(
+    page: int = Query(1, ge=1),
+    size: int = Query(33, ge=1, le=100),
+):
+    skip = (page - 1) * size
+    actors = matcher.match("Actor").skip(skip).limit(size)
     return [Actor(**dict(actor)) for actor in actors]
+
+@app.get("/actors_count")
+async def count_actors():
+    total = graph.evaluate("MATCH (a:Actor) RETURN count(a)")
+    return {"total": total}
 
 @app.delete("/actors/{name}")
 async def delete_actor(name: str):
@@ -201,9 +210,19 @@ async def read_movie(title: str):
     raise HTTPException(status_code=404, detail="Movie not found")
 
 @app.get("/movies", response_model=List[Movie])
-async def read_movies():
-    movies = matcher.match("Movie")
+async def read_movies(
+    page: int = Query(1, ge=1),
+    size: int = Query(33, ge=1, le=100),
+):
+    skip = (page - 1) * size
+    movies = matcher.match("Movie").skip(skip).limit(size)
+
     return [Movie(**dict(movie)) for movie in movies]
+
+@app.get("/movies_count")
+async def count_movies():
+    total = graph.evaluate("MATCH (m:Movie) RETURN count(m)")
+    return {"total": total}
 
 @app.put("/movies/{title}", response_model=Movie)
 async def update_movie(title: str, movie: Movie):

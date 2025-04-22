@@ -9,6 +9,7 @@ import { apiService } from "@/lib/api-config";
 import { SearchBar } from "@/components/ui/searchbar";
 import { Navbar } from "@/components/ui/navbar";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import Paginator from "@/components/ui/paginator";
 
 export default function ActorsPage() {
   const router = useRouter();
@@ -16,24 +17,34 @@ export default function ActorsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchType, setSearchType] = useState("actor");
+  const [page, setPage] = useState(1);
+  const [size] = useState(33); // items per page
+  const [total, setTotal] = useState(0);
+
+  const fetchActors = async (newPage) => {
+    setLoading(true);
+    setPage(newPage);
+    try {
+      const response = await apiService.fetchData(`/actors?page=${newPage}&size=${size}`);
+      if (response.ok) {
+        const data = await response.json();
+        const sortedActors = data.sort((a, b) => a.name.localeCompare(b.name));
+        setActors(sortedActors);
+      }
+      const totalResponse = await apiService.fetchData('/actors_count');
+      if (totalResponse.ok) {
+        const totalData = await totalResponse.json();
+        setTotal(totalData.total);
+      }
+    } catch (error) {
+      console.error('Failed to fetch actors:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchActors = async () => {
-      try {
-        const response = await apiService.fetchData('/actors');
-        if (response.ok) {
-          const data = await response.json();
-          const sortedActors = data.sort((a, b) => a.name.localeCompare(b.name));
-          setActors(sortedActors);
-        }
-      } catch (error) {
-        console.error('Failed to fetch actors:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchActors();
+    fetchActors(1);
   }, []);
 
   const handleNavigation = (path) => {
@@ -65,7 +76,7 @@ export default function ActorsPage() {
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>🎭 All Actors</CardTitle>
-              <p className="text-gray-500 mt-2">({actors.length} actors)</p>
+              <p className="text-gray-500 mt-2">({total} actors)</p>
             </div>
             <div className="flex gap-4">
               <Button 
@@ -117,6 +128,12 @@ export default function ActorsPage() {
               </div>
             </div>
           )}
+          <Paginator
+            page={page}
+            total={total}
+            size={size}
+            onPageChange={fetchActors}
+          />
         </CardContent>
       </Card>
       </div>
