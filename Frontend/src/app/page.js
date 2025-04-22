@@ -11,6 +11,7 @@ import { SearchBar } from "@/components/ui/searchbar";
 import { DetailsCard } from "@/components/ui/details";
 import { apiService } from "@/lib/api-config";
 import { WelcomeMessage } from "@/components/ui/welcome";
+import Navbar from "@/components/ui/navbar";
 
 // Dynamically import ForceGraph2D to avoid SSR issues
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
@@ -449,7 +450,9 @@ RETURN movie, actors`;
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-gray-100">
+      <Navbar />
+      <div className="p-8">
       <Card className="max-w-6xl mx-auto">
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -749,6 +752,7 @@ RETURN movie, actors`;
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

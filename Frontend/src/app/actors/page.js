@@ -7,6 +7,7 @@ import { User, Film } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { apiService } from "@/lib/api-config";
 import { SearchBar } from "@/components/ui/searchbar";
+import { Navbar } from "@/components/ui/navbar";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
 export default function ActorsPage() {
@@ -56,7 +57,9 @@ export default function ActorsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-gray-100">
+      <Navbar />
+      <div className="p-8">
       <Card className="max-w-6xl mx-auto">
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -124,6 +127,7 @@ export default function ActorsPage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 } 

@@ -533,3 +533,120 @@
 2024-11-25 06:01:41,052 - INFO - Actor added to Neo4j with filmography: Bill Paxton
 2024-11-25 06:02:08,190 - INFO - Actor added to Neo4j with filmography: Ioan Gruffudd
 2024-11-25 06:09:00,707 - INFO - Actor added to Neo4j with filmography: Daniel Radcliffe
+2025-04-22 18:21:40,057 - INFO - Loading HTML content
+2025-04-22 18:26:20,164 - INFO - Loading HTML content
+2025-04-22 18:26:28,626 - INFO - Actor added to Neo4j with filmography: Morgan Freeman
+2025-04-22 18:26:30,902 - INFO - Actor added to Neo4j with filmography: Tom Hanks
+2025-04-22 18:26:32,387 - INFO - Actor added to Neo4j with filmography: Leonardo DiCaprio
+2025-04-22 18:26:33,832 - INFO - Actor added to Neo4j with filmography: Denzel Washington
+2025-04-22 18:26:35,516 - INFO - Actor added to Neo4j with filmography: Robert Downey Jr.
+2025-04-22 18:26:37,201 - INFO - Actor added to Neo4j with filmography: Brad Pitt
+2025-04-22 18:26:38,708 - INFO - Actor added to Neo4j with filmography: Christian Bale
+2025-04-22 18:26:40,886 - INFO - Actor added to Neo4j with filmography: Samuel L. Jackson
+2025-04-22 18:26:42,612 - INFO - Actor added to Neo4j with filmography: Johnny Depp
+2025-04-22 18:26:44,084 - INFO - Actor added to Neo4j with filmography: Will Smith
+2025-04-22 18:26:45,629 - INFO - Actor added to Neo4j with filmography: Matt Damon
+2025-04-22 18:26:47,170 - INFO - Actor added to Neo4j with filmography: Gary Oldman
+2025-04-22 18:26:49,036 - INFO - Actor added to Neo4j with filmography: Anthony Hopkins
+2025-04-22 18:26:50,964 - INFO - Actor added to Neo4j with filmography: Michael Caine
+2025-04-22 18:26:52,594 - INFO - Actor added to Neo4j with filmography: Harrison Ford
+2025-04-22 18:26:54,096 - INFO - Actor added to Neo4j with filmography: Al Pacino
+2025-04-22 18:26:56,122 - INFO - Actor added to Neo4j with filmography: Robert De Niro
+2025-04-22 18:26:57,500 - INFO - Actor added to Neo4j with filmography: Tom Cruise
+2025-04-22 18:26:59,202 - INFO - Actor added to Neo4j with filmography: Christopher Walken
+2025-04-22 18:27:00,882 - INFO - Actor added to Neo4j with filmography: Ian McKellen
+2025-04-22 18:27:02,227 - INFO - Actor added to Neo4j with filmography: Joaquin Phoenix
+2025-04-22 18:27:03,427 - INFO - Actor added to Neo4j with filmography: Daniel Day-Lewis
+2025-04-22 18:27:04,808 - INFO - Actor added to Neo4j with filmography: Russell Crowe
+2025-04-22 18:27:06,224 - INFO - Actor added to Neo4j with filmography: Hugh Jackman
+2025-04-22 18:27:07,592 - INFO - Actor added to Neo4j with filmography: Edward Norton
+2025-04-22 18:27:09,008 - INFO - Actor added to Neo4j with filmography: Kevin Spacey
+2025-04-22 18:27:10,756 - INFO - Actor added to Neo4j with filmography: George Clooney
+2025-04-22 18:27:12,533 - INFO - Actor added to Neo4j with filmography: Bruce Willis
+2025-04-22 18:27:13,967 - INFO - Actor added to Neo4j with filmography: Tommy Lee Jones
+2025-04-22 18:27:15,608 - INFO - Actor added to Neo4j with filmography: Sean Connery
+2025-04-22 18:27:17,565 - INFO - Actor added to Neo4j with filmography: Robin Williams
+2025-04-22 18:27:18,959 - INFO - Actor added to Neo4j with filmography: Philip Seymour Hoffman
+2025-04-22 18:27:20,113 - INFO - Actor added to Neo4j with filmography: Heath Ledger
+2025-04-22 18:27:21,773 - INFO - Actor added to Neo4j with filmography: Paul Newman
+2025-04-22 18:27:23,301 - INFO - Actor added to Neo4j with filmography: Marlon Brando
+2025-04-22 18:27:24,895 - INFO - Actor added to Neo4j with filmography: Gregory Peck
+2025-04-22 18:27:25,926 - INFO - Actor added to Neo4j with filmography: James Stewart
+2025-04-22 18:27:27,687 - INFO - Actor added to Neo4j with filmography: Humphrey Bogart
+2025-04-22 18:27:29,397 - INFO - Actor added to Neo4j with filmography: Clark Gable
+2025-04-22 18:27:31,351 - INFO - Actor added to Neo4j with filmography: Charlie Chaplin
+2025-04-22 18:27:33,005 - INFO - Actor added to Neo4j with filmography: Benedict Cumberbatch
+2025-04-22 18:27:34,299 - INFO - Actor added to Neo4j with filmography: Tom Hardy
+2025-04-22 18:27:35,609 - INFO - Actor added to Neo4j with filmography: Michael Fassbender
+2025-04-22 18:27:36,831 - INFO - Actor added to Neo4j with filmography: Ryan Gosling
+2025-04-22 18:27:38,183 - INFO - Actor added to Neo4j with filmography: Jake Gyllenhaal
+2025-04-22 18:27:39,605 - INFO - Actor added to Neo4j with filmography: Idris Elba
+2025-04-22 18:27:40,877 - INFO - Actor added to Neo4j with filmography: Chris Hemsworth
+2025-04-22 18:27:42,147 - INFO - Actor added to Neo4j with filmography: Robert Pattinson
+2025-04-22 18:27:43,329 - INFO - Actor added to Neo4j with filmography: Timoth¨¦e Chalamet
+2025-04-22 18:27:43,851 - INFO - Actor added to Neo4j with filmography: Bruce
+2025-04-22 18:27:44,519 - INFO - Actor added to Neo4j with filmography: Chadwick Boseman
+2025-04-22 18:27:46,209 - INFO - Actor added to Neo4j with filmography: Meryl Streep
+2025-04-22 18:27:47,823 - INFO - Actor added to Neo4j with filmography: Cate Blanchett
+2025-04-22 18:27:49,197 - INFO - Actor added to Neo4j with filmography: Viola Davis
+2025-04-22 18:27:50,781 - INFO - Actor added to Neo4j with filmography: Nicole Kidman
+2025-04-22 18:27:52,191 - INFO - Actor added to Neo4j with filmography: Julia Roberts
+2025-04-22 18:27:53,511 - INFO - Actor added to Neo4j with filmography: Emma Stone
+2025-04-22 18:27:54,791 - INFO - Actor added to Neo4j with filmography: Jennifer Lawrence
+2025-04-22 18:27:56,328 - INFO - Actor added to Neo4j with filmography: Scarlett Johansson
+2025-04-22 18:27:57,698 - INFO - Actor added to Neo4j with filmography: Charlize Theron
+2025-04-22 18:27:59,609 - INFO - Actor added to Neo4j with filmography: Helen Mirren
+2025-04-22 18:28:01,001 - INFO - Actor added to Neo4j with filmography: Kate Winslet
+2025-04-22 18:28:02,768 - INFO - Actor added to Neo4j with filmography: Judi Dench
+2025-04-22 18:28:04,132 - INFO - Actor added to Neo4j with filmography: Sandra Bullock
+2025-04-22 18:28:05,559 - INFO - Actor added to Neo4j with filmography: Angelina Jolie
+2025-04-22 18:28:06,913 - INFO - Actor added to Neo4j with filmography: Jessica Chastain
+2025-04-22 18:28:08,246 - INFO - Actor added to Neo4j with filmography: Amy Adams
+2025-04-22 18:28:09,808 - INFO - Actor added to Neo4j with filmography: Emma Thompson
+2025-04-22 18:28:11,528 - INFO - Actor added to Neo4j with filmography: Glenn Close
+2025-04-22 18:28:12,911 - INFO - Actor added to Neo4j with filmography: Michelle Pfeiffer
+2025-04-22 18:28:14,674 - INFO - Actor added to Neo4j with filmography: Sigourney Weaver
+2025-04-22 18:28:16,418 - INFO - Actor added to Neo4j with filmography: Jodie Foster
+2025-04-22 18:28:18,514 - INFO - Actor added to Neo4j with filmography: Susan Sarandon
+2025-04-22 18:28:19,898 - INFO - Actor added to Neo4j with filmography: Frances McDormand
+2025-04-22 18:28:21,340 - INFO - Actor added to Neo4j with filmography: Diane Keaton
+2025-04-22 18:28:22,348 - INFO - Actor added to Neo4j with filmography: Julie Andrews
+2025-04-22 18:28:23,890 - INFO - Actor added to Neo4j with filmography: Maggie Smith
+2025-04-22 18:28:24,914 - INFO - Actor added to Neo4j with filmography: Audrey Hepburn
+2025-04-22 18:28:25,905 - INFO - Actor added to Neo4j with filmography: Elizabeth Taylor
+2025-04-22 18:28:27,440 - INFO - Actor added to Neo4j with filmography: Katharine Hepburn
+2025-04-22 18:28:29,128 - INFO - Actor added to Neo4j with filmography: Ingrid Bergman
+2025-04-22 18:28:30,793 - INFO - Actor added to Neo4j with filmography: Marilyn Monroe
+2025-04-22 18:28:31,837 - INFO - Actor added to Neo4j with filmography: Grace Kelly
+2025-04-22 18:28:33,088 - INFO - Actor added to Neo4j with filmography: Vivien Leigh
+2025-04-22 18:28:35,052 - INFO - Actor added to Neo4j with filmography: Bette Davis
+2025-04-22 18:28:36,638 - INFO - Actor added to Neo4j with filmography: Lauren Bacall
+2025-04-22 18:28:37,828 - INFO - Actor added to Neo4j with filmography: Margot Robbie
+2025-04-22 18:28:39,016 - INFO - Actor added to Neo4j with filmography: Emma Watson
+2025-04-22 18:28:40,400 - INFO - Actor added to Neo4j with filmography: Anne Hathaway
+2025-04-22 18:28:41,744 - INFO - Actor added to Neo4j with filmography: Natalie Portman
+2025-04-22 18:28:43,065 - INFO - Actor added to Neo4j with filmography: Michelle Williams
+2025-04-22 18:28:44,272 - INFO - Actor added to Neo4j with filmography: Rachel McAdams
+2025-04-22 18:28:45,477 - INFO - Actor added to Neo4j with filmography: Saoirse Ronan
+2025-04-22 18:28:46,743 - INFO - Actor added to Neo4j with filmography: Emily Blunt
+2025-04-22 18:28:48,456 - INFO - Actor added to Neo4j with filmography: Marion Cotillard
+2025-04-22 18:28:50,108 - INFO - Actor added to Neo4j with filmography: Julianne Moore
+2025-04-22 18:28:51,435 - INFO - Actor added to Neo4j with filmography: Brie Larson
+2025-04-22 18:28:52,609 - INFO - Actor added to Neo4j with filmography: Lupita Nyong'o
+2025-04-22 18:28:53,791 - INFO - Actor added to Neo4j with filmography: Zendaya
+2025-04-22 18:28:54,958 - INFO - Actor added to Neo4j with filmography: Florence Pugh
+2025-04-22 18:28:56,397 - INFO - Actor added to Neo4j with filmography: Olivia Colman
+2025-04-22 18:28:56,904 - INFO - Seeded actors - Success: 100, Failed: 0
+2025-04-22 19:22:38,380 - INFO - HTTP Request: GET https://api.themoviedb.org/3/authentication/token/new?api_key=535b98608031a939cdef34fb2a98ebc5 "HTTP/1.1 200 OK"
+2025-04-22 19:23:44,792 - INFO - HTTP Request: GET https://api.themoviedb.org/3/authentication/token/new?api_key=535b98608031a939cdef34fb2a98ebc5 "HTTP/1.1 200 OK"
+2025-04-22 19:24:35,737 - INFO - HTTP Request: POST https://api.themoviedb.org/3/authentication/session/new?api_key=535b98608031a939cdef34fb2a98ebc5 "HTTP/1.1 200 OK"
+2025-04-22 19:24:36,088 - INFO - HTTP Request: GET https://api.themoviedb.org/3/account?api_key=535b98608031a939cdef34fb2a98ebc5&session_id=db63356346ae3c506a9e376f1215b436f44855a4 "HTTP/1.1 200 OK"
+2025-04-22 19:24:40,653 - INFO - HTTP Request: GET https://api.themoviedb.org/3/authentication/token/new?api_key=535b98608031a939cdef34fb2a98ebc5 "HTTP/1.1 200 OK"
+2025-04-22 19:24:43,307 - INFO - HTTP Request: POST https://api.themoviedb.org/3/authentication/session/new?api_key=535b98608031a939cdef34fb2a98ebc5 "HTTP/1.1 200 OK"
+2025-04-22 19:24:43,665 - INFO - HTTP Request: GET https://api.themoviedb.org/3/account?api_key=535b98608031a939cdef34fb2a98ebc5&session_id=1ba93a5c097cbf05b853421ab96e057d933bb6a6 "HTTP/1.1 200 OK"
+2025-04-22 19:32:21,452 - INFO - HTTP Request: GET https://api.themoviedb.org/3/authentication/token/new?api_key=535b98608031a939cdef34fb2a98ebc5 "HTTP/1.1 200 OK"
+2025-04-22 19:32:25,534 - INFO - HTTP Request: POST https://api.themoviedb.org/3/authentication/session/new?api_key=535b98608031a939cdef34fb2a98ebc5 "HTTP/1.1 200 OK"
+2025-04-22 19:32:25,884 - INFO - HTTP Request: GET https://api.themoviedb.org/3/account?api_key=535b98608031a939cdef34fb2a98ebc5&session_id=99c534a7399f63c8a051c91eb8f33b98f2b35355 "HTTP/1.1 200 OK"
+2025-04-22 19:33:47,360 - INFO - HTTP Request: GET https://api.themoviedb.org/3/authentication/token/new?api_key=535b98608031a939cdef34fb2a98ebc5 "HTTP/1.1 200 OK"
+2025-04-22 19:33:50,427 - INFO - HTTP Request: POST https://api.themoviedb.org/3/authentication/session/new?api_key=535b98608031a939cdef34fb2a98ebc5 "HTTP/1.1 200 OK"
+2025-04-22 19:33:50,776 - INFO - HTTP Request: GET https://api.themoviedb.org/3/account?api_key=535b98608031a939cdef34fb2a98ebc5&session_id=76914ef664e6e6f56601cb9d4b20924287f32322 "HTTP/1.1 200 OK"

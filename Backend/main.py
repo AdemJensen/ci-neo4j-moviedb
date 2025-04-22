@@ -8,6 +8,7 @@ from typing import Optional, List
 import logging
 import requests
 import re
+import httpx
 from datetime import datetime
 import asyncio
 from pathlib import Path
@@ -37,7 +38,6 @@ PORT = os.getenv("PORT",10000)
 graph = Graph(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD),name="neo4j")
 matcher = NodeMatcher(graph)
 
-
 # Set up logging
 logging.basicConfig(filename='api_log.txt', level=logging.INFO, 
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -45,7 +45,10 @@ logging.basicConfig(filename='api_log.txt', level=logging.INFO,
 # Load HTML content
 # Update the HTML content loading to use a function
 def get_html_content():
+    print("Loading HTML content")
+    logging.info("Loading HTML content")
     html_path = Path(__file__).parent / "index.html"
+    print(f"HTML path: {html_path}")
     try:
         with open(html_path, "r", encoding='utf-8') as file:
             return file.read()
@@ -701,6 +704,55 @@ async def seed_actors():
         logging.error(f"Error seeding actors: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/tmdb/request-token")
+async def request_token():
+    async with httpx.AsyncClient() as client:
+        res = await client.get(f"https://api.themoviedb.org/3/authentication/token/new?api_key={TMDB_API_KEY}")
+        data = res.json()
+        return {"request_token": data["request_token"]}
+
+@app.get("/tmdb/create-session")
+async def create_session(request_token: str):
+    async with httpx.AsyncClient() as client:
+        res = await client.post(
+            f"https://api.themoviedb.org/3/authentication/session/new?api_key={TMDB_API_KEY}",
+            json={"request_token": request_token}
+        )
+        data = res.json()
+        return {"session_id": data["session_id"]}
+
+@app.get("/tmdb/account")
+async def get_account(session_id: str):
+    async with httpx.AsyncClient() as client:
+        res = await client.get(
+            f"https://api.themoviedb.org/3/account?api_key={TMDB_API_KEY}&session_id={session_id}"
+        )
+        data = res.json()
+        return {
+            "id": data["id"],
+            "name": data.get("name") or data.get("username"),
+            "avatar": data.get("avatar")
+        }
+
+@app.get("/tmdb/rated-movies")
+async def get_rated_movies(session_id: str):
+    # Step 1: get account ID
+    async with httpx.AsyncClient() as client:
+        account_res = await client.get(
+            f"https://api.themoviedb.org/3/account",
+            params={"api_key": TMDB_API_KEY, "session_id": session_id}
+        )
+        account_data = account_res.json()
+        account_id = account_data["id"]
+
+        # Step 2: get rated movies
+        rated_res = await client.get(
+            f"https://api.themoviedb.org/3/account/{account_id}/rated/movies",
+            params={"api_key": TMDB_API_KEY, "session_id": session_id}
+        )
+        return rated_res.json()
+
+
 # Update root endpoint
 @app.get("/", response_class=HTMLResponse)
 async def root():
@@ -708,5 +760,5 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=10000)
+    uvicorn.run(app, host="0.0.0.0", port=PORT)
 

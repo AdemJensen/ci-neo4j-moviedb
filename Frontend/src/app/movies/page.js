@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { apiService } from "@/lib/api-config";
 import { SearchBar } from "@/components/ui/searchbar";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import Navbar from "@/components/ui/navbar";
 
 export default function MoviesPage() {
   const router = useRouter();
@@ -57,7 +58,9 @@ export default function MoviesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-gray-100">
+      <Navbar />
+      <div className="p-8">
       <Card className="max-w-6xl mx-auto">
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -132,6 +135,7 @@ export default function MoviesPage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 } 
