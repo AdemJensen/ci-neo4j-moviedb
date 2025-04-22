@@ -14,6 +14,7 @@ import requests
 import httpx
 from datetime import datetime
 from pathlib import Path
+import recommendation
 
 app = FastAPI()
 

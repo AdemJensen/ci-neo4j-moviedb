@@ -3,3 +3,6 @@ Backend/__pycache__/main.cpython-311.pyc
 .env
 .idea
 api_log.txt
+Backend/recommendation/svd_model_500*
+Backend/recommendation/TheMoviesDataset
+Backend/recommendation/TMDB_movie_dataset_v11.csv
