@@ -83,13 +83,13 @@ export default function Navbar() {
               onClick={() => setOpen(!open)}
             />
             {open && (
-              <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-lg z-50 text-center">
                 <div className="px-4 py-2 border-b text-sm font-semibold">
                   {user.name || 'Unnamed'}
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                  className="w-full text-red-700 px-4 py-2 text-sm hover:bg-gray-100"
                 >
                   Logout
                 </button>
