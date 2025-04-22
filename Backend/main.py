@@ -772,6 +772,28 @@ async def get_rated_movies(session_id: str):
         return rated_res.json()
 
 
+# FastAPI backend
+@app.get("/tmdb/favorites")
+async def get_favorite_movies(session_id: str, page: int = Query(1, ge=1)):
+    async with httpx.AsyncClient() as client:
+        # Step 1: Get account_id
+        account_res = await client.get(
+            f"https://api.themoviedb.org/3/account",
+            params={"api_key": TMDB_API_KEY, "session_id": session_id}
+        )
+        account_data = account_res.json()
+        account_id = account_data["id"]
+
+        # Step 2: Get favorite movies
+        fav_res = await client.get(
+            f"https://api.themoviedb.org/3/account/{account_id}/favorite/movies",
+            params={"api_key": TMDB_API_KEY, "session_id": session_id, "page": page, "sort_by": "created_at.desc"}
+        )
+        # print(fav_res.json())
+        return fav_res.json()
+
+
+
 # Update root endpoint
 @app.get("/", response_class=HTMLResponse)
 async def root():

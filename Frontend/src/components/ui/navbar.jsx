@@ -1,13 +1,12 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { apiService } from "@/lib/api-config";
 import {usePathname} from "next/navigation";
+import {gotoAuthPage} from "@/lib/utils";
 
 export default function Navbar() {
   const [user, setUser] = useState(null)
-  const dropdownRef = useRef(null)
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -17,13 +16,6 @@ export default function Navbar() {
       setUser(JSON.parse(stored))
     }
   }, [])
-
-  const handleLogin = async () => {
-    const res = await apiService.fetchData('/tmdb/request-token');
-    const { request_token } = await res.json()
-    const redirectUrl = `${window.location.origin}/tmdb-auth`
-    window.location.href = `https://www.themoviedb.org/authenticate/${request_token}?redirect_to=${redirectUrl}`
-  }
 
   const handleLogout = () => {
     localStorage.removeItem('tmdb_user')
@@ -69,7 +61,7 @@ export default function Navbar() {
       <div className="relative">
         {!user ? (
           <button
-            onClick={handleLogin}
+            onClick={gotoAuthPage}
             className="bg-yellow-400 hover:bg-yellow-500 text-black font-medium px-4 py-2 rounded-full transition"
           >
             Login via TMDB
@@ -83,17 +75,22 @@ export default function Navbar() {
               onClick={() => setOpen(!open)}
             />
             {open && (
-              <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-lg z-50 text-center">
-                <div className="px-4 py-2 border-b text-sm font-semibold">
-                  {user.name || 'Unnamed'}
+                <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-lg z-50 text-center">
+                  <div className="px-4 py-2 border-b text-sm font-semibold">
+                    {user.name || 'Unnamed'}
+                  </div>
+                  <button
+                      className="w-full px-4 py-2 text-sm hover:bg-gray-100"
+                  >
+                    <Link href="/favorites">Favorites</Link>
+                  </button>
+                  <button
+                      onClick={handleLogout}
+                      className="w-full text-red-700 px-4 py-2 text-sm hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-red-700 px-4 py-2 text-sm hover:bg-gray-100"
-                >
-                  Logout
-                </button>
-              </div>
             )}
           </div>
         )}
@@ -102,4 +99,4 @@ export default function Navbar() {
   )
 }
 
-export { Navbar }
+export {Navbar}
