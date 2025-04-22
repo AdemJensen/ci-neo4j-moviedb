@@ -76,14 +76,6 @@ export default function ActorsPage() {
                 <MagnifyingGlassIcon size={16} />
                 Back to Home
               </Button>
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2"
-                onClick={() => handleNavigation('/movies')}
-              >
-                <Film size={16} />
-                View All Movies
-              </Button>
             </div>
           </div>
         </CardHeader>

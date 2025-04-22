@@ -121,6 +121,7 @@ const NotFoundMessage = ({ type, query, onAddActor }) => (
 export default function Home() {
   const router = useRouter();
   const ForceGraphRef = useRef();
+  const graphReady = useRef(false)
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchType, setSearchType] = useState("actor");
@@ -236,6 +237,7 @@ export default function Home() {
   };
 
   useEffect(() => {
+    // console.log("Triggering!");
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
       const query = params.get("q");
@@ -262,6 +264,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    // console.log("Triggering!");
     const checkForActors = async () => {
       try {
         const response = await apiService.fetchData("/actors");
@@ -457,24 +460,6 @@ RETURN movie, actors`;
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>🎬 Movie Database Explorer 🍿</CardTitle>
-            <div className="flex gap-4">
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => handleNavigation("/actors")}
-              >
-                <User size={16} />
-                View All Actors
-              </Button>
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => handleNavigation("/movies")}
-              >
-                <Film size={16} />
-                View All Movies
-              </Button>
-            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -541,7 +526,7 @@ RETURN movie, actors`;
               {/* Graph Visualization */}
               <div className="h-[600px] border rounded-lg overflow-hidden bg-white relative">
                 <ForceGraph2D
-                  ref={ForceGraphRef}
+                  // ref={ForceGraphRef}
                   graphData={graphData}
                   nodeLabel="name"
                   nodeColor={(node) =>
@@ -562,11 +547,11 @@ RETURN movie, actors`;
                   enableZoom={true}
                   minZoom={0.5}
                   maxZoom={4}
-                  cooldownTicks={50}
+                  // cooldownTicks={50}
                   linkDistance={100}
                   d3AlphaDecay={0.02}
                   d3VelocityDecay={0.3}
-                  autoPauseRedraw={false}
+                  // autoPauseRedraw={false}
                   nodeCanvasObject={(node, ctx, globalScale) => {
                     const label = node.name;
                     const fontSize = 12 / globalScale;
@@ -601,6 +586,9 @@ RETURN movie, actors`;
                     ctx.fillText(label, node.x, node.y + 12);
                   }}
                   onEngineStop={() => {
+                    // if (graphReady.current) return;
+                    // graphReady.current = true; // ensure only runs once
+
                     const graphBounds = {
                       x: { min: Infinity, max: -Infinity },
                       y: { min: Infinity, max: -Infinity },
