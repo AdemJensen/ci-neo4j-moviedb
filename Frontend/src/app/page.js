@@ -93,7 +93,27 @@ const addActorFromTMDB = async (actorName) => {
   }
 };
 
-const NotFoundMessage = ({ type, query, onAddActor }) => (
+const addMovieFromTMDB = async (movieName) => {
+  try {
+    const formattedName = movieName.trim();
+
+    const response = await apiService.postData(
+      `/add_movie_from_tmdb/${encodeURIComponent(formattedName)}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to add movie");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error adding actor:", error);
+    throw error;
+  }
+};
+
+const NotFoundMessage = ({ type, query, onAddActor, onAddMovie }) => (
   <div className="text-center py-12">
     <div className="mb-4">
       <span className="text-6xl">🔍</span>
@@ -112,6 +132,16 @@ const NotFoundMessage = ({ type, query, onAddActor }) => (
         </p>
         <Button onClick={onAddActor} className="bg-blue-500 hover:bg-blue-600">
           Add Actor from TMDB
+        </Button>
+      </div>
+    )}
+    {type === "movie" && (
+      <div className="space-y-4">
+        <p className="text-sm text-gray-500">
+          Would you like to add this movie from TMDB?
+        </p>
+        <Button onClick={onAddMovie} className="bg-blue-500 hover:bg-blue-600">
+          Add Movie from TMDB
         </Button>
       </div>
     )}
@@ -438,6 +468,24 @@ RETURN movie, actors`;
     }
   };
 
+  const handleAddMovie = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await addMovieFromTMDB(searchQuery);
+
+      // After successfully adding the actor, perform a new search
+      if (result) {
+        await handleSearch(searchQuery, "movie");
+      }
+    } catch (error) {
+      setError("Failed to add movie from TMDB. Please try again.");
+      setNotFound(true); // Keep the not found state if addition fails
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleNavigation = (path) => {
     // Reset all states
     setSearchQuery("");
@@ -499,6 +547,7 @@ RETURN movie, actors`;
               type={searchType}
               query={lastSearchedQuery}
               onAddActor={handleAddActor}
+              onAddMovie={handleAddMovie}
             />
           ) : graphData.nodes.length > 0 ? (
             <div className="space-y-8">

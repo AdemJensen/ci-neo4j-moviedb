@@ -1,16 +1,18 @@
-import os
+from neo4j import add_movie_to_neo4j
+from tmdb import fetch_movie_from_tmdb
+from tmdb import fetch_actor_from_tmdb
+from neo4j import add_actor_to_neo4j
+from config import *
+from models import *
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from py2neo import Graph, Node, Relationship, NodeMatcher
+from py2neo import Node, Relationship
 from typing import Optional, List
 import logging
 import requests
-import re
 import httpx
 from datetime import datetime
-import asyncio
 from pathlib import Path
 
 app = FastAPI()
@@ -22,25 +24,6 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
-
-# Neo4j connection setup
-NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
-
-# TMDB API setup
-TMDB_API_KEY = os.getenv("TMDB_API_KEY", "535b98608031a939cdef34fb2a98ebc5")
-TMDB_BASE_URL = os.getenv("TMDB_BASE_URL", "https://api.themoviedb.org/3")
-
-PORT = os.getenv("PORT",10000)
-
-# Connect to Neo4j
-graph = Graph(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD),name="neo4j")
-matcher = NodeMatcher(graph)
-
-# Set up logging
-logging.basicConfig(filename='api_log.txt', level=logging.INFO, 
-                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Load HTML content
 # Update the HTML content loading to use a function
@@ -58,12 +41,6 @@ def get_html_content():
     except Exception as e:
         logging.error(f"Error reading index.html: {str(e)}")
         return f"Error reading index.html: {str(e)}"
-
-logging.basicConfig(
-    filename=Path(__file__).parent.parent / 'api_log.txt',
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
     
 @app.get("/autocomplete/{search_type}")
 async def autocomplete(search_type: str, query: str = Query(..., min_length=1)):
@@ -124,30 +101,7 @@ async def search(search_type: str, query: str = Query(..., min_length=1)):
     except Exception as e:
         logging.error(f"Error in search: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
-    
-class Actor(BaseModel):
-    name: str
-    date_of_birth: Optional[str] = None
-    gender: Optional[str] = None
-    date_of_death: Optional[str] = None
-    profile_path: Optional[str] = None
 
-class Movie(BaseModel):
-    title: str
-    year: str
-
-class ActorInMovie(BaseModel):
-    actor_name: str
-    movie_title: str
-
-class ActorFilmography(BaseModel):
-    actor: Actor
-    movies: List[Movie]
-
-class ActorCreate(BaseModel):
-    name: str
-    date_of_birth: Optional[str] = None
-    gender: Optional[str] = None
 # Actor CRUD operations
 @app.post("/actors", response_model=Actor)
 async def create_actor(actor: Actor):
@@ -243,6 +197,26 @@ async def delete_movie(title: str):
         return {"message": f"Movie {title} deleted successfully"}
     raise HTTPException(status_code=404, detail="Movie not found")
 
+
+@app.post("/add_movie_from_tmdb/{movie_title}")
+async def add_actor_from_tmdb(movie_title: str):
+    try:
+        movie_data = fetch_movie_from_tmdb(movie_title)
+        if movie_data:
+            added_movie = add_movie_to_neo4j(movie_data)
+            return {
+                "message": f"Movie {movie_title} added successfully with casts",
+                "data": {
+                    "title": added_movie['title'],
+                    "year": added_movie['year']
+                }
+            }
+        else:
+            raise HTTPException(status_code=404, detail=f"Movie {movie_title} not found in TMDB")
+    except Exception as e:
+        logging.error(f"Error adding actor from TMDB: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Relationship operation
 @app.post("/actor_in_movie")
 async def add_actor_to_movie(relation: ActorInMovie):
@@ -264,67 +238,7 @@ async def add_actor_to_movie(relation: ActorInMovie):
         logging.error(f"Error adding relationship: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# TMDB Integration
-def fetch_actor_from_tmdb(actor_name):
-    search_url = f"{TMDB_BASE_URL}/search/person"
-    params = {
-        "api_key": TMDB_API_KEY,
-        "query": actor_name
-    }
-    response = requests.get(search_url, params=params)
-    data = response.json()
 
-    if data["results"]:
-        actor_data = data["results"][0]
-        actor_id = actor_data["id"]
-        profile_path = actor_data.get("profile_path")  # Get profile path from search results
-
-        # Fetch detailed actor info
-        details_url = f"{TMDB_BASE_URL}/person/{actor_id}"
-        params = {
-            "api_key": TMDB_API_KEY,
-            "append_to_response": "movie_credits"
-        }
-        response = requests.get(details_url, params=params)
-        actor_details = response.json()
-
-        filmography = []
-        for movie in actor_details.get('movie_credits', {}).get('cast', []):
-            if movie.get('release_date'):
-                year = movie['release_date'][:4]
-                filmography.append({
-                    "title": movie['title'],
-                    "year": year
-                })
-
-        return {
-            "name": actor_details["name"],
-            "date_of_birth": actor_details.get("birthday"),
-            "gender": "Male" if actor_details["gender"] == 2 else "Female",
-            "date_of_death": actor_details.get("deathday"),
-            "profile_path": profile_path,  # Add profile path to return data
-            "filmography": filmography
-        }
-    return None
-
-def add_actor_to_neo4j(actor_data):
-    actor_node = Node("Actor", 
-                     name=actor_data['name'],
-                     date_of_birth=actor_data['date_of_birth'],
-                     gender=actor_data['gender'],
-                     date_of_death=actor_data['date_of_death'],
-                     profile_path=actor_data['profile_path'])  # Add profile path to node
-    graph.merge(actor_node, "Actor", "name")
-
-    for movie in actor_data['filmography']:
-        movie_node = Node("Movie", title=movie['title'], year=movie['year'])
-        graph.merge(movie_node, "Movie", "title")
-        
-        acted_in = Relationship(actor_node, "ACTED_IN", movie_node)
-        graph.merge(acted_in)
-
-    logging.info(f"Actor added to Neo4j with filmography: {actor_data['name']}")
-    return actor_data
 
 @app.post("/add_actor_from_tmdb/{actor_name}")
 async def add_actor_from_tmdb(actor_name: str):
@@ -539,189 +453,8 @@ async def health_check():
 
 @app.post("/seed/actors")
 async def seed_actors():
-    """
-    Seed a predefined list of 100 actors (50 male, 50 female) into the database.
-    Includes both current and deceased actors.
-    """
-    actors_to_seed = {
-        # Male Actors (50)
-        # Deceased actors marked with † at the end
-        "male": [
-            "Morgan Freeman",
-            "Tom Hanks",
-            "Leonardo DiCaprio",
-            "Denzel Washington",
-            "Robert Downey Jr.",
-            "Brad Pitt",
-            "Christian Bale",
-            "Samuel L. Jackson",
-            "Johnny Depp",
-            "Will Smith",
-            "Matt Damon",
-            "Gary Oldman",
-            "Anthony Hopkins",
-            "Michael Caine",
-            "Harrison Ford",
-            "Al Pacino",
-            "Robert De Niro",
-            "Tom Cruise",
-            "Christopher Walken",
-            "Ian McKellen",
-            "Joaquin Phoenix",
-            "Daniel Day-Lewis",
-            "Russell Crowe",
-            "Hugh Jackman",
-            "Edward Norton",
-            "Kevin Spacey",
-            "George Clooney",
-            "Bruce Willis",
-            "Tommy Lee Jones",
-            "Sean Connery †",    # Deceased 2020
-            "Robin Williams †",   # Deceased 2014
-            "Philip Seymour Hoffman †",  # Deceased 2014
-            "Heath Ledger †",     # Deceased 2008
-            "Paul Newman †",      # Deceased 2008
-            "Marlon Brando †",    # Deceased 2004
-            "Gregory Peck †",     # Deceased 2003
-            "James Stewart †",    # Deceased 1997
-            "Humphrey Bogart †",  # Deceased 1957
-            "Clark Gable †",      # Deceased 1960
-            "Charlie Chaplin †",  # Deceased 1977
-            "Benedict Cumberbatch",
-            "Tom Hardy",
-            "Michael Fassbender",
-            "Ryan Gosling",
-            "Jake Gyllenhaal",
-            "Idris Elba",
-            "Chris Hemsworth",
-            "Robert Pattinson",
-            "Timothée Chalamet",
-            "Chadwick Boseman †"  # Deceased 2020
-        ],
-        # Female Actors (50)
-        # Deceased actors marked with † at the end
-        "female": [
-            "Meryl Streep",
-            "Cate Blanchett",
-            "Viola Davis",
-            "Nicole Kidman",
-            "Julia Roberts",
-            "Emma Stone",
-            "Jennifer Lawrence",
-            "Scarlett Johansson",
-            "Charlize Theron",
-            "Helen Mirren",
-            "Kate Winslet",
-            "Judi Dench",
-            "Sandra Bullock",
-            "Angelina Jolie",
-            "Jessica Chastain",
-            "Amy Adams",
-            "Emma Thompson",
-            "Glenn Close",
-            "Michelle Pfeiffer",
-            "Sigourney Weaver",
-            "Jodie Foster",
-            "Susan Sarandon",
-            "Frances McDormand",
-            "Diane Keaton",
-            "Julie Andrews",
-            "Maggie Smith",
-            "Audrey Hepburn †",   # Deceased 1993
-            "Elizabeth Taylor †",  # Deceased 2011
-            "Katharine Hepburn †", # Deceased 2003
-            "Ingrid Bergman †",    # Deceased 1982
-            "Marilyn Monroe †",    # Deceased 1962
-            "Grace Kelly †",       # Deceased 1982
-            "Vivien Leigh †",      # Deceased 1967
-            "Bette Davis †",       # Deceased 1989
-            "Lauren Bacall †",     # Deceased 2014
-            "Margot Robbie",
-            "Emma Watson",
-            "Anne Hathaway",
-            "Natalie Portman",
-            "Michelle Williams",
-            "Rachel McAdams",
-            "Saoirse Ronan",
-            "Emily Blunt",
-            "Marion Cotillard",
-            "Julianne Moore",
-            "Brie Larson",
-            "Lupita Nyong'o",
-            "Zendaya",
-            "Florence Pugh",
-            "Olivia Colman"
-        ]
-    }
-    
-    try:
-        results = {
-            "success": [],
-            "failed": [],
-            "stats": {
-                "male": {"created": 0, "skipped": 0, "failed": 0},
-                "female": {"created": 0, "skipped": 0, "failed": 0}
-            }
-        }
-        
-        # Process all actors
-        for gender, actors in actors_to_seed.items():
-            for actor_name in actors:
-                # Remove the † marker if present
-                clean_name = actor_name.replace(" †", "")
-                
-                try:
-                    # Check if actor already exists
-                    existing_actor = matcher.match("Actor", name=clean_name).first()
-                    
-                    if existing_actor:
-                        results["success"].append({
-                            "name": clean_name,
-                            "gender": gender,
-                            "status": "skipped - already exists"
-                        })
-                        results["stats"][gender]["skipped"] += 1
-                        continue
-                    
-                    # Fetch data from TMDB and create actor
-                    actor_data = fetch_actor_from_tmdb(clean_name)
-                    if actor_data:
-                        add_actor_to_neo4j(actor_data)
-                        results["success"].append({
-                            "name": clean_name,
-                            "gender": gender,
-                            "status": "created",
-                            "movies_added": len(actor_data.get('filmography', []))
-                        })
-                        results["stats"][gender]["created"] += 1
-                    else:
-                        raise Exception("No data found in TMDB")
-                    
-                except Exception as e:
-                    results["failed"].append({
-                        "name": clean_name,
-                        "gender": gender,
-                        "error": str(e)
-                    })
-                    results["stats"][gender]["failed"] += 1
-                
-                # Add a small delay to avoid rate limiting
-                await asyncio.sleep(0.5)
-                
-        summary = {
-            "total_attempted": len(actors_to_seed["male"]) + len(actors_to_seed["female"]),
-            "total_successful": len(results["success"]),
-            "total_failed": len(results["failed"]),
-            "gender_stats": results["stats"],
-            "details": results
-        }
-        
-        logging.info(f"Seeded actors - Success: {summary['total_successful']}, Failed: {summary['total_failed']}")
-        return summary
-        
-    except Exception as e:
-        logging.error(f"Error seeding actors: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+    from seed_actors import seed_actors as seed_actors_func
+    await seed_actors_func()
 
 @app.get("/tmdb/request-token")
 async def request_token():
