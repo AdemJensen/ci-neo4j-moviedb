@@ -30,7 +30,7 @@ export default function Navbar() {
     : `https://www.gravatar.com/avatar/${user?.avatar?.gravatar?.hash}?s=64`
 
   const tabs = [
-    { name: 'Recommendations', href: '/recommendations' },
+    { name: 'Recommendations', href: '/recommendations', alias: '/form-recommendation' },
     { name: 'Actors', href: '/actors' },
     { name: 'Movies', href: '/movies' },
   ]
@@ -49,7 +49,7 @@ export default function Navbar() {
             key={tab.href}
             href={tab.href}
             className={`hover:text-yellow-300 transition ${
-              pathname === tab.href ? 'text-yellow-400 border-b-2 border-yellow-400 pb-1' : 'text-white'
+              pathname === tab.href || pathname === tab.alias ? 'text-yellow-400 border-b-2 border-yellow-400 pb-1' : 'text-white'
             }`}
           >
             {tab.name}

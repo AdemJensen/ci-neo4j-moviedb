@@ -21,6 +21,7 @@
     "react-dom": "19.0.0-rc-69d4b800-20241021",
     "react-force-graph": "^1.44.6",
     "react-force-graph-2d": "^1.25.7",
+    "react-markdown": "^10.1.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7"
   },

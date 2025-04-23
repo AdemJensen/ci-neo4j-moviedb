@@ -33,6 +33,7 @@ app.add_middleware(
 sio = socketio.AsyncServer(cors_allowed_origins="*", async_mode='asgi')
 main_app = socketio.ASGIApp(sio, other_asgi_app=app)
 
+
 # Load HTML content
 # Update the HTML content loading to use a function
 def get_html_content():
@@ -49,16 +50,17 @@ def get_html_content():
     except Exception as e:
         logging.error(f"Error reading index.html: {str(e)}")
         return f"Error reading index.html: {str(e)}"
-    
+
+
 @app.get("/autocomplete/{search_type}")
 async def autocomplete(search_type: str, query: str = Query(..., min_length=1)):
     if search_type not in ['actor', 'movie']:
         raise HTTPException(status_code=400, detail="Invalid search type")
-    
+
     # Define label based on search type
     label = 'Actor' if search_type == 'actor' else 'Movie'
     property_name = 'name' if search_type == 'actor' else 'title'
-    
+
     # Modified Cypher query to handle both exact and partial matches
     cypher_query = f"""
     MATCH (n:{label})
@@ -71,26 +73,27 @@ async def autocomplete(search_type: str, query: str = Query(..., min_length=1)):
     RETURN n.{property_name} AS name, relevance
     LIMIT 10
     """
-    
+
     try:
         results = graph.run(cypher_query, query=query).data()
-        
+
         # Format results
         suggestions = [result['name'] for result in results]
         return suggestions
-        
+
     except Exception as e:
         logging.error(f"Error in autocomplete: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 @app.get("/search/{search_type}")
 async def search(search_type: str, query: str = Query(..., min_length=1)):
     if search_type not in ['actor', 'movie']:
         raise HTTPException(status_code=400, detail="Invalid search type")
-    
+
     label = 'Actor' if search_type == 'actor' else 'Movie'
     property_name = 'name' if search_type == 'actor' else 'title'
-    
+
     cypher_query = f"""
     MATCH (n:{label})
     WHERE toLower(n.{property_name}) CONTAINS toLower($query)
@@ -102,13 +105,14 @@ async def search(search_type: str, query: str = Query(..., min_length=1)):
     RETURN n
     LIMIT 20
     """
-    
+
     try:
         results = graph.run(cypher_query, query=query).data()
         return [dict(result['n']) for result in results]
     except Exception as e:
         logging.error(f"Error in search: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 # Actor CRUD operations
 @app.post("/actors", response_model=Actor)
@@ -122,6 +126,7 @@ async def create_actor(actor: Actor):
         logging.error(f"Error creating actor: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/actors/{name}", response_model=Actor)
 async def read_actor(name: str):
     actor_node = matcher.match("Actor", name=name).first()
@@ -129,19 +134,22 @@ async def read_actor(name: str):
         return Actor(**dict(actor_node))
     raise HTTPException(status_code=404, detail="Actor not found")
 
+
 @app.get("/actors", response_model=List[Actor])
 async def read_actors(
-    page: int = Query(1, ge=1),
-    size: int = Query(33, ge=1, le=100),
+        page: int = Query(1, ge=1),
+        size: int = Query(33, ge=1, le=100),
 ):
     skip = (page - 1) * size
     actors = matcher.match("Actor").skip(skip).limit(size)
     return [Actor(**dict(actor)) for actor in actors]
 
+
 @app.get("/actors_count")
 async def count_actors():
     total = graph.evaluate("MATCH (a:Actor) RETURN count(a)")
     return {"total": total}
+
 
 @app.delete("/actors/{name}")
 async def delete_actor(name: str):
@@ -151,6 +159,7 @@ async def delete_actor(name: str):
         logging.info(f"Actor deleted: {name}")
         return {"message": f"Actor {name} deleted successfully"}
     raise HTTPException(status_code=404, detail="Actor not found")
+
 
 # Movie CRUD operations
 @app.post("/movies", response_model=Movie)
@@ -164,6 +173,7 @@ async def create_movie(movie: Movie):
         logging.error(f"Error creating movie: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/movies/{title}", response_model=Movie)
 async def read_movie(title: str):
     movie_node = matcher.match("Movie", title=title).first()
@@ -171,20 +181,23 @@ async def read_movie(title: str):
         return Movie(**dict(movie_node))
     raise HTTPException(status_code=404, detail="Movie not found")
 
+
 @app.get("/movies", response_model=List[Movie])
 async def read_movies(
-    page: int = Query(1, ge=1),
-    size: int = Query(33, ge=1, le=100),
+        page: int = Query(1, ge=1),
+        size: int = Query(33, ge=1, le=100),
 ):
     skip = (page - 1) * size
     movies = matcher.match("Movie").skip(skip).limit(size)
 
     return [Movie(**dict(movie)) for movie in movies]
 
+
 @app.get("/movies_count")
 async def count_movies():
     total = graph.evaluate("MATCH (m:Movie) RETURN count(m)")
     return {"total": total}
+
 
 @app.put("/movies/{title}", response_model=Movie)
 async def update_movie(title: str, movie: Movie):
@@ -195,6 +208,7 @@ async def update_movie(title: str, movie: Movie):
         logging.info(f"Movie updated: {title}")
         return Movie(**dict(movie_node))
     raise HTTPException(status_code=404, detail="Movie not found")
+
 
 @app.delete("/movies/{title}")
 async def delete_movie(title: str):
@@ -225,27 +239,27 @@ async def add_actor_from_tmdb(movie_title: str):
         logging.error(f"Error adding actor from TMDB: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # Relationship operation
 @app.post("/actor_in_movie")
 async def add_actor_to_movie(relation: ActorInMovie):
     try:
         actor_node = matcher.match("Actor", name=relation.actor_name).first()
         movie_node = matcher.match("Movie", title=relation.movie_title).first()
-        
+
         if not actor_node:
             raise HTTPException(status_code=404, detail="Actor not found")
         if not movie_node:
             raise HTTPException(status_code=404, detail="Movie not found")
-        
+
         acted_in = Relationship(actor_node, "ACTED_IN", movie_node)
         graph.merge(acted_in)
-        
+
         logging.info(f"Relationship added: {relation.actor_name} ACTED_IN {relation.movie_title}")
         return {"message": f"Relationship added: {relation.actor_name} ACTED_IN {relation.movie_title}"}
     except Exception as e:
         logging.error(f"Error adding relationship: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-
 
 
 @app.post("/add_actor_from_tmdb/{actor_name}")
@@ -268,7 +282,8 @@ async def add_actor_from_tmdb(actor_name: str):
     except Exception as e:
         logging.error(f"Error adding actor from TMDB: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+
 @app.get("/actors/{name}/filmography", response_model=Optional[ActorFilmography])
 async def get_actor_filmography(name: str):
     cypher_query = """
@@ -278,15 +293,15 @@ async def get_actor_filmography(name: str):
     WITH actor, collect(m) as movies
     RETURN actor, movies
     """
-    
+
     result = graph.run(cypher_query, name=name).data()
-    
+
     if not result or not result[0]['actor']:
         return None
-        
+
     actor_data = result[0]['actor']
     movies_data = result[0]['movies']
-    
+
     return {
         "actor": {
             "name": actor_data["name"],
@@ -302,6 +317,8 @@ async def get_actor_filmography(name: str):
             } for movie in movies_data
         ]
     }
+
+
 @app.put("/actors/{name}", response_model=Actor)
 async def update_actor(name: str, actor: Optional[Actor] = None):
     try:
@@ -329,7 +346,7 @@ async def update_actor(name: str, actor: Optional[Actor] = None):
 
             actor_data = data["results"][0]
             actor_id = actor_data["id"]
-            
+
             # Fetch detailed actor info
             details_url = f"{TMDB_BASE_URL}/person/{actor_id}"
             params = {
@@ -338,7 +355,7 @@ async def update_actor(name: str, actor: Optional[Actor] = None):
             }
             details_response = requests.get(details_url, params=params)
             actor_details = details_response.json()
-            
+
             # Update actor in Neo4j
             cypher_query = """
             MATCH (a:Actor {name: $name})
@@ -348,7 +365,7 @@ async def update_actor(name: str, actor: Optional[Actor] = None):
                 a.date_of_death = COALESCE($deathday, a.date_of_death)
             RETURN a
             """
-            
+
             result = graph.run(cypher_query, {
                 'name': name,
                 'profile_path': actor_data.get('profile_path'),
@@ -363,12 +380,13 @@ async def update_actor(name: str, actor: Optional[Actor] = None):
                     "message": "Actor updated successfully",
                     "data": result[0]['a']
                 }
-                
+
             return {"message": "No updates available"}
-            
+
     except Exception as e:
         logging.error(f"Error updating actor: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/movies/{title}/cast")
 async def get_movie_cast(title: str):
@@ -379,7 +397,7 @@ async def get_movie_cast(title: str):
     WITH movie, [actor in unsorted_actors | actor {.*}] as actors_data
     RETURN movie, apoc.coll.sort(actors_data, '^.name') as actors
     """
-    
+
     # If you don't have APOC installed, use this simpler query instead:
     alternative_query = """
     MATCH (m:Movie {title: $title})
@@ -389,20 +407,20 @@ async def get_movie_cast(title: str):
     WITH movie, collect(a) as actors
     RETURN movie, actors
     """
-    
+
     try:
         # Try with APOC first
         result = graph.run(cypher_query, title=title).data()
     except Exception:
         # Fall back to alternative query if APOC is not available
         result = graph.run(alternative_query, title=title).data()
-    
+
     if not result or not result[0]['movie']:
         raise HTTPException(status_code=404, detail="Movie not found")
-        
+
     movie_data = result[0]['movie']
     actors_data = result[0]['actors']
-    
+
     return {
         "movie": {
             "title": movie_data["title"],
@@ -415,6 +433,7 @@ async def get_movie_cast(title: str):
         ]
     }
 
+
 @app.get("/movie/poster/{title}")
 async def get_movie_poster(title: str):
     try:
@@ -425,10 +444,10 @@ async def get_movie_poster(title: str):
             "query": title,
             "year": None  # You could add year if available for more accurate results
         }
-        
+
         response = requests.get(search_url, params=params)
         data = response.json()
-        
+
         if data["results"]:
             # Return the first result's poster path
             return {
@@ -437,10 +456,11 @@ async def get_movie_poster(title: str):
             }
         else:
             return {"poster_path": None, "tmdb_id": None}
-            
+
     except Exception as e:
         logging.error(f"Error fetching movie poster: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/health")
 async def health_check():
@@ -459,10 +479,12 @@ async def health_check():
         }
     }
 
+
 @app.post("/seed/actors")
 async def seed_actors():
     from seed_actors import seed_actors as seed_actors_func
     return await seed_actors_func()
+
 
 @app.get("/tmdb/request-token")
 async def request_token():
@@ -470,6 +492,7 @@ async def request_token():
         res = await client.get(f"https://api.themoviedb.org/3/authentication/token/new?api_key={TMDB_API_KEY}")
         data = res.json()
         return {"request_token": data["request_token"]}
+
 
 @app.get("/tmdb/create-session")
 async def create_session(request_token: str):
@@ -480,6 +503,7 @@ async def create_session(request_token: str):
         )
         data = res.json()
         return {"session_id": data["session_id"]}
+
 
 @app.get("/tmdb/account")
 async def get_account(session_id: str):
@@ -493,6 +517,7 @@ async def get_account(session_id: str):
             "name": data.get("name") or data.get("username"),
             "avatar": data.get("avatar")
         }
+
 
 @app.get("/tmdb/rated-movies")
 async def get_rated_movies(session_id: str):
@@ -517,8 +542,9 @@ async def get_rated_movies(session_id: str):
 async def get_favorite_movies(session_id: str, page: int = Query(1, ge=1)):
     return await get_favorite_movies_tmdb(session_id, page)
 
+
 @app.get("/recommendations")
-async def get_favorite_movies(session_id: str):
+async def get_recommend_movies(session_id: str):
     favorite_movies = await get_favorite_movies_tmdb(session_id, 1)
     # for each movie, get id
     tmdb_ids = [movie["id"] for movie in favorite_movies["results"]]
@@ -528,23 +554,68 @@ async def get_favorite_movies(session_id: str):
         "results": res,
     }
 
+
+class RecommendInput(BaseModel):
+    genre: str
+    country: str
+    language: str
+    year_range: str
+    description: str
+
+
+@app.post("/form-recommendations")
+async def recommend_movie_by_form(data: RecommendInput):
+    print("Received form data:", data)
+    prompt = (
+        f"Please recommend a movie based on the following preferences:\n"
+        f"Genre: {data.genre}; Country: {data.country}; Language: {data.language}; Release Period: {data.year_range}.\n"
+        f"User Description: {data.description}\n\n"
+        f"Provide the movie title, a short summary, and the reason for your recommendation."
+    )
+
+    headers = {
+        "Authorization": f"Bearer " + SILICONFLOW_SK,
+        "Content-Type": "application/json"
+    }
+
+    try:
+        resp = requests.post("https://api.siliconflow.cn/v1/chat/completions", headers=headers,
+                             json={
+                                 "model": SILICONFLOW_MODEL,
+                                 "messages": [{"role": "user", "content": prompt}],
+                                 "stream": False,
+                                 "temperature": 0.5
+                             })
+        result = resp.json()
+        answer = result["choices"][0]["message"]["content"]
+    except Exception as e:
+        logging.error(f"Error generating recommendation: {str(e)}")
+        answer = "❌ Failed to generate recommendation. Please try again later."
+
+    return {"recommendation": answer}
+
+
 # Update root endpoint
 @app.get("/", response_class=HTMLResponse)
 async def root():
     return get_html_content()
+
 
 # Socket.IO 接口
 @sio.event
 async def connect(sid, environ):
     print(f"Client connected: {sid}")
 
+
 @sio.event
 async def disconnect(sid):
     print(f"Client disconnected: {sid}")
 
+
 @sio.event
 async def session_request(sid, data):
     await sio.emit("session_confirm", {"session_id": sid}, to=sid)
+
 
 @sio.event
 async def user_uttered(sid, data):
@@ -552,8 +623,10 @@ async def user_uttered(sid, data):
     loop.run_in_executor(None, user_uttered_handle, sio, loop, sid, data)
     print(f"User uttered: {data}, handle is over.")
 
+
 if __name__ == "__main__":
     import uvicorn
+
     if SILICONFLOW_SK == "":
         logger.warning("SILICONFLOW_SK is not set. Bot chatting is disabled.")
         uvicorn.run(app, host="0.0.0.0", port=PORT)
