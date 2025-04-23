@@ -517,7 +517,7 @@ async def get_favorite_movies(session_id: str):
     # for each movie, get id
     tmdb_ids = [movie["id"] for movie in favorite_movies["results"]]
     res = recommend_by_tmdb_movies(tmdb_ids)
-    print("Recommended movies:", res)
+    # print("Recommended movies:", res)
     return {
         "results": res,
     }
