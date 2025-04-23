@@ -29,12 +29,22 @@ The simplest way to run the application is using the pre-built Docker images:
 - [Backend](https://hub.docker.com/r/azharntu/in6299-ci-neo4j-moviedb-backend)
 - [Neo4j](https://hub.docker.com/_/neo4j)
 
-```bash
-# Pull the images
-docker pull azharntu/in6299-ci-neo4j-moviedb-frontend:latest
-docker pull azharntu/in6299-ci-neo4j-moviedb-backend:latest
-docker pull neo4j:5.20.0
+You should configure the environment variables in the `docker-compose.yaml` file before running the application. The default configuration is set to use a local Neo4j instance.
 
+```yaml
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=password
+      - TMDB_API_KEY=535b98608031a939cdef34fb2a98ebc5 # Replace with TMDB API key
+      - TMDB_BASE_URL=https://api.themoviedb.org/3
+      - PORT=10000
+      - SILICONFLOW_SK= # Fill in your SiliconFlow secret key, otherwise the bot will not show up
+```
+
+By default, the SILICONFLOW_SK is set to empty, and the bot will not show up on the webpage. You can fill in your SiliconFlow secret key to enable the bot.
+
+```bash
 # Run using docker-compose
 docker-compose up
 ```
@@ -64,6 +74,7 @@ environment:
       - TMDB_API_KEY=535b98608031a939cdef34fb2a98ebc5 # Replace with TMDB API key
       - TMDB_BASE_URL=https://api.themoviedb.org/3
       - PORT=10000
+      - SILICONFLOW_SK= # Fill in your SiliconFlow secret key, otherwise the bot will not show up
 ```
 
 ```bash
@@ -268,3 +279,28 @@ The frontend application at [localhost:3000](http://localhost:3000) provides:
    - Browser history integration
      - Actor search url example: http://localhost:3000/?q=Daniel+Radcliffe&type=actor
      - Movie search url example: http://localhost:3000/?q=Harry+Potter+and+the+Philosopher%27s+Stone&type=movie 
+
+5. **TMDB Account Integrations**
+   - Login to TMDB account (OAuth1.0 like flow)
+   ![TMDB Login](Screenshots/tmdb-login1.png)
+   ![TMDB Login](Screenshots/tmdb-login2.png)
+   ![TMDB Login](Screenshots/tmdb-login3.png)
+   - View TMDB account favorites
+   ![TMDB Favorite](Screenshots/tmdb-favorite.png)
+
+5. **Movie Recommendations**
+   - Recommend movies based on TMDB favorites
+    ![Movie Recommendations](Screenshots/recommendation1.png)
+    ![Movie Recommendations](Screenshots/recommendation2.png)
+   - Movie recommendations based on a fixed form
+    ![Movie Recommendations](Screenshots/recommendation3.png)
+
+6. **SiliconFlow Bot Integration**
+   - Normal chatting and greeting
+    ![SiliconFlow Bot](Screenshots/siliconflow-chat.png)
+   - Actor query (click any link to jump to the navigation page)
+    ![SiliconFlow Bot](Screenshots/siliconflow-actor.png)
+   - Movie query
+    ![SiliconFlow Bot](Screenshots/siliconflow-movie.png)
+   - Movie recommendations
+    ![SiliconFlow Bot](Screenshots/siliconflow-recommend.png)

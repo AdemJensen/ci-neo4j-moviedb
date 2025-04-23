@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {useEffect, useState} from 'react'
 import Navbar from '@/components/ui/navbar'
@@ -16,21 +16,28 @@ export default function FavoritesPage() {
     const [page, setPage] = useState(1);
     const [size] = useState(20); // items per page
     const [total, setTotal] = useState(0);
-    const session_id = localStorage.getItem('tmdb_session_id')
+    const [sessionId, setSessionId] = useState(null);
 
     useEffect(() => {
-        if (!session_id) {
-            gotoAuthPage()
-            return
+        // Now only runs on the client
+        const sid = localStorage.getItem('tmdb_session_id');
+        if (!sid) {
+            gotoAuthPage();
+            return;
         }
+        setSessionId(sid);
+    }, []);
 
-        handlePageChange(1)
-    }, [])
+    useEffect(() => {
+        if (sessionId) {
+            handlePageChange(1);
+        }
+    }, [sessionId]);
 
     const handlePageChange = (newPage) => {
         setLoading(true)
         setPage(newPage);
-        apiService.fetchData(`/tmdb/favorites?session_id=${session_id}&page=${newPage}`)
+        apiService.fetchData(`/tmdb/favorites?session_id=${sessionId}&page=${newPage}`)
             .then(res => res.json())
             .then(data => {
                 console.log('Favorites data:', data)

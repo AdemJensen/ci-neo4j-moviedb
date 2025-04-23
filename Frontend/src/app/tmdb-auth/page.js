@@ -1,9 +1,10 @@
-'use client'
-import { useEffect } from 'react'
+"use client";
+
+import {Suspense, useEffect} from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {apiService} from "@/lib/api-config";
 
-export default function TMDBAuthPage() {
+function TMDBAuth() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -24,5 +25,13 @@ export default function TMDBAuthPage() {
     }
   }, [searchParams, router])
 
-  return <p>Logging you in...</p>
+  return (
+      <p>Logging you in...</p>
+  )
+}
+
+export default function TMDBAuthPage() {
+    return <Suspense fallback={<p>Loading TMDB login...</p>}>
+        <TMDBAuth/>
+      </Suspense>
 }

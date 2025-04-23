@@ -18,6 +18,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
+# Download and install model environments
+RUN python -m recommendation.prepare_env
+
 # Expose port
 EXPOSE 10000
 

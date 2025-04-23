@@ -1,6 +1,6 @@
 services:
   backend:
-    image: azharntu/in6299-ci-neo4j-moviedb-backend:latest
+    image: rentenglong/in6299-ci-neo4j-moviedb-backend:latest
     ports:
       - "10000:10000"
     environment:
@@ -10,6 +10,7 @@ services:
       - TMDB_API_KEY=535b98608031a939cdef34fb2a98ebc5 # Replace with TMDB API key
       - TMDB_BASE_URL=https://api.themoviedb.org/3
       - PORT=10000
+      - SILICONFLOW_SK= # Fill in your SiliconFlow secret key, otherwise the bot will not show up
     depends_on:
       neo4j:
         condition: service_healthy
@@ -17,11 +18,11 @@ services:
       - app-network
 
   frontend:
-    image: azharntu/in6299-ci-neo4j-moviedb-frontend:latest
+    image: rentenglong/in6299-ci-neo4j-moviedb-frontend:latest
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://backend:10000
+      - NEXT_PUBLIC_API_URL=http://backend:10000 # This will not work because Next.js inlines the environment variables at build time
     depends_on:
       - backend
     networks:

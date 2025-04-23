@@ -13,6 +13,10 @@ export const getApiBaseUrl = () => {
   if (window.location.hostname.endsWith('.onrender.com')) {
     return 'https://ci-neo4j-moviedb-backend.onrender.com';
   }
+  if (window.location.port === '3000') {
+    // replace window.location.origin's port with 10000
+    return `${window.location.origin.replace(/:\d+$/, ':10000')}`;
+  }
   return process.env.NEXT_PUBLIC_API_URL;
 };
   
