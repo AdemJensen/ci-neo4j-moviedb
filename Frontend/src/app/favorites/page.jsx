@@ -28,6 +28,7 @@ export default function FavoritesPage() {
     }, [])
 
     const handlePageChange = (newPage) => {
+        setLoading(true)
         setPage(newPage);
         apiService.fetchData(`/tmdb/favorites?session_id=${session_id}&page=${newPage}`)
             .then(res => res.json())
