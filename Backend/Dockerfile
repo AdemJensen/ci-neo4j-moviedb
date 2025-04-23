@@ -25,4 +25,4 @@ RUN python -m recommendation.prepare_env
 EXPOSE 10000
 
 # Start the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"] 
+CMD ["python", "main.py"]

@@ -161,83 +161,33 @@ npm run start
 - `NEXT_PUBLIC_API_URL`: Backend API URL (default: http://localhost:10000)
 ---
 ## API Documentation
-FastAPI automatically generates API documentation at `/docs` and `/redoc` endpoints of the backend service ([localhost:10000](http://localhost:10000)).
-- [API Documentation](https://ci-neo4j-moviedb-backend.onrender.com/docs)
-- [API Documentation ReDoc](https://ci-neo4j-moviedb-backend.onrender.com/redoc)
+FastAPI automatically generates API documentation at `/docs` and `/redoc` endpoints of the backend service ([localhost:10000/docs](http://localhost:10000/docs)).
 
-### Actor Endpoints
+## Porting data from The Movies Dataset
 
-#### Search Actors
-```
-GET /search/actor?query={query}
-```
-Search for actors by name.
+We have developed a script to port data from [The Movies Dataset](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset/data) to Neo4j. The script is located at `Scrapers & Migration Scripts/import_the_movies_dataset.py`.
 
-#### Get Actor Details
+To run the script:
+1. Make sure you have the backend model essentials installed and running.
+```bash
+cd Backend
+python -m recommendation.prepare_env # Downloads and extract dataset
 ```
-GET /actors/{name}
-```
-Get details for a specific actor.
+2. Configure the neo4j properties in `Scrapers & Migration Scripts/config.py`:
+```python
+# Connect to Neo4j
+graph = Graph("bolt://localhost:7687", auth=("neo4j", "password"))
 
-#### Get Actor Filmography
+# File paths
+MOVIE_METADATA_CSV = "../Backend/recommendation/TheMoviesDataset/movies_metadata.csv"
+CREDITS_CSV = "../Backend/recommendation/TheMoviesDataset/credits.csv"
 ```
-GET /actors/{name}/filmography
+3. Run the script:
+```bash
+cd Scrapers & Migration Scripts
+python import_the_movies_dataset.py
 ```
-Get an actor's complete filmography.
 
-#### Add Actor from TMDB
-```
-POST /add_actor_from_tmdb/{actor_name}
-```
-Add an actor and their filmography from TMDB.
-
-#### Update Actor
-```
-PUT /actors/{name}
-```
-Update actor details, optionally fetching from TMDB.
-
-### Movie Endpoints
-
-#### Search Movies
-```
-GET /search/movie?query={query}
-```
-Search for movies by title.
-
-#### Get Movie Cast
-```
-GET /movies/{title}/cast
-```
-Get the complete cast list for a movie.
-
-#### Get Movie Poster
-```
-GET /movie/poster/{title}
-```
-Get movie poster information from TMDB.
-
-### Utility Endpoints
-
-#### Autocomplete
-```
-GET /autocomplete/{search_type}?query={query}
-```
-Get autocomplete suggestions for actors or movies.
-
-#### Health Check
-```
-GET /health
-```
-Check the health status of the application.
-
-#### Seed Database
-```
-POST /seed/actors
-```
-Seed the database with a predefined list of actors.
-
----
 ## Frontend Functionality (Next.js)
 
 The frontend application at [localhost:3000](http://localhost:3000) provides:
@@ -282,9 +232,9 @@ The frontend application at [localhost:3000](http://localhost:3000) provides:
 
 5. **TMDB Account Integrations**
    - Login to TMDB account (OAuth1.0 like flow)
-   ![TMDB Login](Screenshots/tmdb-login1.png)
    ![TMDB Login](Screenshots/tmdb-login2.png)
    ![TMDB Login](Screenshots/tmdb-login3.png)
+   ![TMDB Login](Screenshots/tmdb-login1.png)
    - View TMDB account favorites
    ![TMDB Favorite](Screenshots/tmdb-favorite.png)
 
@@ -297,10 +247,14 @@ The frontend application at [localhost:3000](http://localhost:3000) provides:
 
 6. **SiliconFlow Bot Integration**
    - Normal chatting and greeting
-    ![SiliconFlow Bot](Screenshots/siliconflow-chat.png)
+     
+      ![SiliconFlow Bot](Screenshots/siliconflow-chat.png)
    - Actor query (click any link to jump to the navigation page)
-    ![SiliconFlow Bot](Screenshots/siliconflow-actor.png)
+    
+      ![SiliconFlow Bot](Screenshots/siliconflow-actor.png)
    - Movie query
-    ![SiliconFlow Bot](Screenshots/siliconflow-movie.png)
+    
+      ![SiliconFlow Bot](Screenshots/siliconflow-movie.png)
    - Movie recommendations
-    ![SiliconFlow Bot](Screenshots/siliconflow-recommend.png)
+    
+      ![SiliconFlow Bot](Screenshots/siliconflow-recommend.png)
