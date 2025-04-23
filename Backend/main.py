@@ -1,3 +1,4 @@
+from mcp import *
 from recommendation import recommend_by_tmdb_movies
 from neo4j import add_movie_to_neo4j
 from tmdb import fetch_movie_from_tmdb
@@ -16,6 +17,8 @@ import requests
 import httpx
 from datetime import datetime
 from pathlib import Path
+import socketio
+import asyncio
 
 app = FastAPI()
 
@@ -26,6 +29,9 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
+
+sio = socketio.AsyncServer(cors_allowed_origins="*", async_mode='asgi')
+main_app = socketio.ASGIApp(sio, other_asgi_app=app)
 
 # Load HTML content
 # Update the HTML content loading to use a function
@@ -527,7 +533,29 @@ async def get_favorite_movies(session_id: str):
 async def root():
     return get_html_content()
 
+# Socket.IO 接口
+@sio.event
+async def connect(sid, environ):
+    print(f"Client connected: {sid}")
+
+@sio.event
+async def disconnect(sid):
+    print(f"Client disconnected: {sid}")
+
+@sio.event
+async def session_request(sid, data):
+    await sio.emit("session_confirm", {"session_id": sid}, to=sid)
+
+@sio.event
+async def user_uttered(sid, data):
+    loop = asyncio.get_event_loop()
+    loop.create_task(user_uttered_handle(sio, sid, data))
+    print(f"User uttered: {data}, handle is over.")
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=PORT)
-
+    if SILICONFLOW_SK == "":
+        logger.warning("SILICONFLOW_SK is not set. Bot chatting is disabled.")
+        uvicorn.run(app, host="0.0.0.0", port=PORT)
+    else:
+        uvicorn.run(main_app, host="0.0.0.0", port=PORT)

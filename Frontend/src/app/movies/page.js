@@ -9,6 +9,7 @@ import { SearchBar } from "@/components/ui/searchbar";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import Navbar from "@/components/ui/navbar";
 import Paginator from "@/components/ui/paginator";
+import RasaChatWidget from "@/components/ui/RasaChatWidget";
 
 export default function MoviesPage() {
   const router = useRouter();
@@ -144,6 +145,7 @@ export default function MoviesPage() {
         </CardContent>
       </Card>
       </div>
+      <RasaChatWidget />
     </div>
   );
 } 

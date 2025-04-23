@@ -12,6 +12,7 @@ import { DetailsCard } from "@/components/ui/details";
 import { apiService } from "@/lib/api-config";
 import { WelcomeMessage } from "@/components/ui/welcome";
 import Navbar from "@/components/ui/navbar";
+import RasaChatWidget from "@/components/ui/RasaChatWidget";
 
 // Dynamically import ForceGraph2D to avoid SSR issues
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
@@ -790,6 +791,7 @@ RETURN movie, actors`;
         </CardContent>
       </Card>
       </div>
+      <RasaChatWidget />
     </div>
   );
 }

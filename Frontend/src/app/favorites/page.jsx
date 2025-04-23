@@ -7,6 +7,7 @@ import {apiService} from "@/lib/api-config";
 import Paginator from "@/components/ui/paginator";
 import {gotoAuthPage} from "@/lib/utils";
 import {useRouter} from "next/navigation";
+import RasaChatWidget from "@/components/ui/RasaChatWidget";
 
 export default function FavoritesPage() {
     const router = useRouter();
@@ -90,6 +91,7 @@ export default function FavoritesPage() {
                     </CardContent>
                 </Card>
             </div>
+            <RasaChatWidget />
         </div>
     )
 }

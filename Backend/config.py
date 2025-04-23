@@ -14,10 +14,32 @@ TMDB_BASE_URL = os.getenv("TMDB_BASE_URL", "https://api.themoviedb.org/3")
 
 PORT = os.getenv("PORT",10000)
 
+SILICONFLOW_SK = os.getenv("SILICONFLOW_SK", "")
+# SILICONFLOW_MODEL = os.getenv("SILICONFLOW_MODEL", "THUDM/glm-4-9b-chat")
+SILICONFLOW_MODEL = os.getenv("SILICONFLOW_MODEL", "Pro/deepseek-ai/DeepSeek-V3")
+
 # Connect to Neo4j
 graph = Graph(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD),name="neo4j")
 matcher = NodeMatcher(graph)
 
 # Set up logging
-logging.basicConfig(filename='api_log.txt', level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+# Create a logger
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+# Create handlers
+file_handler = logging.FileHandler('api_log.txt')
+console_handler = logging.StreamHandler()
+
+# Set level for handlers
+file_handler.setLevel(logging.INFO)
+console_handler.setLevel(logging.INFO)
+
+# Create a formatter and set it for both handlers
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+console_handler.setFormatter(formatter)
+
+# Add handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)

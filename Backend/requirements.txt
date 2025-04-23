@@ -13,3 +13,5 @@ scipy
 tqdm
 httpx
 zipfile
+python-socketio>=5.8.0
+python-engineio>=4.6.0

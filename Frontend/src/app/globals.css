@@ -89,3 +89,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.rw-response a {
+  color: blue;
+  text-decoration: underline;
+}

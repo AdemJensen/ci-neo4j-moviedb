@@ -7,6 +7,7 @@ import {Button} from '@/components/ui/button'
 import {apiService} from "@/lib/api-config";
 import {gotoAuthPage} from "@/lib/utils";
 import {useRouter} from "next/navigation";
+import RasaChatWidget from "@/components/ui/RasaChatWidget";
 
 export default function RecommendationPage() {
     const router = useRouter();
@@ -109,6 +110,7 @@ export default function RecommendationPage() {
                     </CardContent>
                 </Card>
             </div>
+            <RasaChatWidget />
         </div>
     )
 }
