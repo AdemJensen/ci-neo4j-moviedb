@@ -1,6 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import {apiService} from "@/lib/api-config";
 
 export default function TMDBAuthPage() {
   const searchParams = useSearchParams()
@@ -9,11 +10,11 @@ export default function TMDBAuthPage() {
   useEffect(() => {
     const request_token = searchParams.get('request_token')
     if (request_token) {
-      fetch(`http://localhost:10000/tmdb/create-session?request_token=${request_token}`)
+      apiService.fetchData(`/tmdb/create-session?request_token=${request_token}`)
         .then(res => res.json())
         .then(({ session_id }) => {
           localStorage.setItem('tmdb_session_id', session_id)
-          return fetch(`http://localhost:10000/tmdb/account?session_id=${session_id}`)
+          return apiService.fetchData(`/tmdb/account?session_id=${session_id}`)
         })
         .then(res => res.json())
         .then(user => {
