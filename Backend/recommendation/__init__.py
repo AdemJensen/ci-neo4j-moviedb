@@ -49,6 +49,13 @@ def unzip_file(zip_path, extract_to):
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         zip_ref.extractall(extract_to)
 
+def calculate_list_embeddings():
+    from .filter_embedding import encode_and_save_embeddings_from_csv
+    from .filter_embedding import GENRES_PT_FILE, KEYWORDS_PT_FILE, GENRES_CSV_FILE, KEYWORDS_CSV_FILE
+    # Encode and save the embeddings
+    encode_and_save_embeddings_from_csv(GENRES_CSV_FILE, GENRES_PT_FILE)
+    encode_and_save_embeddings_from_csv(KEYWORDS_CSV_FILE, KEYWORDS_PT_FILE)
+
 def setup_model_data_auto():
     setup_model_data("https://www.dropbox.com/scl/fi/6g0psqd25dy1ihuzo6pwi/model.zip?rlkey=jfkyihw9c3xchvd8isvlb2pho&st=qvxxs8w0&dl=1")
 

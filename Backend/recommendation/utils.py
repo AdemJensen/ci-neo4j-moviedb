@@ -1,5 +1,6 @@
 from pathlib import Path
 import pandas as pd
+from .filter_embedding import load_embeddings, get_names_with_score_gt, find_top_k_similar_from_cache, GENRES_PT_FILE, KEYWORDS_PT_FILE
 from .predict_newuser import build_liked_list_from_preferences
 from .model_based_cf import SVDRecommender
 
@@ -10,6 +11,8 @@ movielens_df = pd.read_csv(Path(__file__).parent / "TheMoviesDataset/movies.csv"
 movie_meta_df = pd.read_csv(Path(__file__).parent / "TheMoviesDataset/movies_metadata.csv", dtype={"id": str})
 recommender = SVDRecommender()
 recommender.load(Path(__file__).parent / "svd_model_500/")
+genres_list, genres_embeddings = load_embeddings(GENRES_PT_FILE)
+keywords_list, keywords_embeddings = load_embeddings(KEYWORDS_PT_FILE)
 print("Recommendation essentials loaded successfully.")
 
 def movieId_to_tmdbId(movie_id):
@@ -66,11 +69,26 @@ def recommend_by_movies_ids(movie_ids):
     return final_results[:20]
 
 def recommend_by_genres(genres, keywords):
+    print(f"Genres: {genres}, Keywords: {keywords}")
+    fuzzy_genres = []
+    for genre in genres:
+        fuzzy_genres_lst = find_top_k_similar_from_cache(genre, genres_list, genres_embeddings, k=3)
+        fuzzy_genres.extend(get_names_with_score_gt(fuzzy_genres_lst, 0.5))
+    fuzzy_genres = list(set(fuzzy_genres))
+
+    fuzzy_keywords = []
+    for keyword in keywords:
+        fuzzy_keywords_lst = find_top_k_similar_from_cache(keyword, keywords_list, keywords_embeddings, k=3)
+        fuzzy_keywords.extend(get_names_with_score_gt(fuzzy_keywords_lst, 0.5))
+    fuzzy_keywords = list(set(fuzzy_keywords))
+
+    print(f"Fuzzy genres: {fuzzy_genres}, fuzzy keywords: {fuzzy_keywords}")
+
     liked_movies = build_liked_list_from_preferences(
         tmdb_df,
         movielens_df,
-        genres=genres,
-        keywords=keywords,
+        genres=fuzzy_genres,
+        keywords=fuzzy_keywords,
         sample_size=20
     )
 

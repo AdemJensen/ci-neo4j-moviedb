@@ -24,7 +24,7 @@ def search_movie_tmdb(keyword):
     return {
         "title": movie["title"],
         "overview": movie.get("overview", "No overview."),
-        "url": f"https://sampledomain.com/?q={quote(movie['title'])}&type=movie"
+        "url": f"https://movie.com/?q={quote(movie['title'])}&type=movie"
     }
 
 def search_actor_tmdb(name):
@@ -40,37 +40,50 @@ def search_actor_tmdb(name):
     actor = response["results"][0]
     return {
         "name": actor["name"],
-        "known_for": [item["title"] for item in actor.get("known_for", []) if "title" in item],
-        "url": f"https://sampledomain.com/?q={quote(actor['name'])}&type=actor"
+        "known_for": [{
+            "title": item["title"],
+            "url": f"https://movie.com/?q={quote(item['title'])}&type=movie"
+        } for item in actor.get("known_for", []) if "title" in item],
+        "url": f"https://movie.com/?q={quote(actor['name'])}&type=actor"
     }
 
 def recommend_by_genres_wrap(genres, keywords):
     result = recommend_by_genres(genres, keywords)
     for movie in result:
-        movie["url"] = f"https://sampledomain.com/?q={quote(movie['title'])}&type=movie"
+        movie["url"] = f"https://movie.com/?q={quote(movie['title'])}&type=movie"
     return result
 
 # --- Core Chat Logic ---
 def call_bot(messages):
     if len(messages) > 20:
         messages = messages[-20:]
-    if len(messages) == 0:
-        # append system message
-        messages.append({
-            "role": "system",
-            "content": "You are a Movie Chatbot. You can search for movies and actors. "
-                       "If the user asks for a movie or actor, "
-                       "you should use the search_movie or search_actor function to search and get the details page"
-                       " and provide the user with links. "
-                       "If the user asks for a recommendation, "
-                       "you should ask for genres and keywords from user first, and then use the recommend_by_genres"
-                       " function to get the recommendation. DO NOT recommend without knowing genres and keywords."
-                       "When you display any movie or actor, please provide a link to the details page."
-        })
-        messages.append({
-            "role": "assistant",
-            "content": "Hello! I am The Movie Master. You can ask me about movies, actors, or for recommendations."
-        })
+    # attach system prompts at the beginning
+    processed_messages = [{
+        "role": "system",
+        "content": (
+            "You are a Movie Chatbot named The Movie Master. You can search for movies and actors, and make recommendations. "
+            "If the user asks about a movie or actor, use the search_movie or search_actor tool to search and provide links. "
+            "If the user asks for a recommendation, follow these rules strictly:\n\n"
+
+            "1. First, check if the user has already mentioned genres (like 'action', 'comedy', 'sci-fi') and keywords (like 'robots', 'fighting', 'space') in their message.\n"
+            "2. If both genres and keywords are found in the message, use the recommend_by_genres tool directly with the parsed values.\n"
+            "3. If either genres or keywords are missing, ask the user to provide them explicitly.\n"
+            "4. When using recommend_by_genres, always trust the result and use it to respond. Do not filter the result manually.\n\n"
+
+            "💡 Example:\n"
+            "- User: 'Can you recommend something? I like action movies with robots and fighting!'\n"
+            "- Parsed genres: ['action'], Parsed keywords: ['robots', 'fighting'] → proceed to call recommend_by_genres.\n\n"
+
+            "Wrap all movie or actor names with markdown links using the 'url' field from the tool response."
+            "💡 Example:\n"
+            "- User: 'Do you know Anthony Hopkins?' → Call search_actor\n"
+            "- Tool: {'name': 'Hugh Jackman', 'known_for': [{'title': 'Logan', 'url': 'https://movie.com/?q=Logan&type=movie'}, {'title': 'The Prestige', 'url': 'https://movie.com/?q=The%20Prestige&type=movie'}, {'title': 'X-Men: Days of Future Past', 'url': 'https://movie.com/?q=X-Men%3A%20Days%20of%20Future%20Past&type=movie'}], 'url': 'https://movie.com/?q=Hugh%20Jackman&type=actor'}"
+            "- Response: Yes, I know [Anthony Hopkins](https://movie.com/?q=Anthony%20Hopkins&type=actor)! He is a renowned actor, known for his roles in movies like The Silence of the [Lambs](https://movie.com/?q=Lambs&type=movie), [Thor](https://movie.com/?q=Thor&type=movie), and [Hannibal](https://movie.com/?q=Hannibal&type=movie)."
+        )
+    }, {
+        "role": "assistant",
+        "content": "Hello! I am The Movie Master. You can ask me about movies, actors, or for recommendations."
+    }] + messages
     url = "https://api.siliconflow.cn/v1/chat/completions"
     headers = {
         "Authorization": "Bearer " + SILICONFLOW_SK,
@@ -78,7 +91,7 @@ def call_bot(messages):
     }
     payload = {
         "model": SILICONFLOW_MODEL,
-        "messages": messages,
+        "messages": processed_messages,
         "stream": False,
         "temperature": 0.7,
         "top_p": 0.7,
@@ -185,7 +198,7 @@ def user_uttered_handle(sio, loop, sid, data):
                     return
                 call_loops += 1
 
-                print("Tool calls detected: ", len(choice["tool_calls"]))
+                print(f"Tool calls detected: {len(choice['tool_calls'])} in total, requests: {choice['tool_calls']}")
                 tool_calls = choice["tool_calls"]
                 messages.append({"role": "assistant", "tool_calls": tool_calls})
 
@@ -214,14 +227,13 @@ def user_uttered_handle(sio, loop, sid, data):
                         })
             else:
                 print("No tool calls detected.")
-                call_loops = 0
                 break
         print("Final messages: ", choice)
         final_text = choice.get("content", "Sorry, we are encountering some technical issues, please retry later.")
         user_sessions[session_id] = messages + [{"role": "assistant", "content": final_text}]
 
         # remove the 'https://sampledomain.com' part from the text
-        final_text = final_text.replace("https://sampledomain.com", "")
+        final_text = final_text.replace("https://movie.com", "")
 
         sio_emit(sio, loop, "bot_uttered", {"text": final_text}, to=sid)
     except Exception as e:

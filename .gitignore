@@ -6,3 +6,5 @@ api_log.txt
 Backend/recommendation/svd_model_500*
 Backend/recommendation/TheMoviesDataset
 Backend/recommendation/TMDB_movie_dataset_v11.csv
+Backend/recommendation/filter_options/genres.pt
+Backend/recommendation/filter_options/keywords.pt
