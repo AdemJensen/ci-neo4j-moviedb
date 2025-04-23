@@ -213,16 +213,14 @@ def user_uttered_handle(sio, loop, sid, data):
                         messages.append({
                             "role": "tool",
                             "tool_call_id": tool_call["id"],
-                            "name": tool_name,
                             "content": json.dumps(result)
                         })
                     else:
                         # print(f"Tool call not valid: {tool_name}")
-                        logger.error(f"Tool call not valid: {tool_name}")
+                        logger.error(f"Tool not found: {tool_name}")
                         messages.append({
                             "role": "tool",
                             "tool_call_id": tool_call["id"],
-                            "name": tool_name,
                             "content": json.dumps({"error": f"Tool {tool_name} not found"})
                         })
             else:
