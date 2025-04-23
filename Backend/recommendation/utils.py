@@ -37,7 +37,7 @@ def get_mata(movie_id):
         return None
     # convert first row to dict
     # print(df.iloc[0].to_dict())
-    df = df[['id', 'title', 'poster_path', 'release_date']]
+    df = df[['id', 'title', 'release_date']]
     return df.iloc[0].to_dict()
 
 def recommend_by_tmdb_movies(tmdb_ids):

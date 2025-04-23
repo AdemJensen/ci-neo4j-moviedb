@@ -1,3 +1,4 @@
+import asyncio
 import json
 from urllib.parse import quote
 
@@ -9,7 +10,7 @@ from recommendation import recommend_by_genres
 user_sessions = {}
 
 # --- Function Definitions ---
-async def search_movie_tmdb(keyword):
+def search_movie_tmdb(keyword):
     url = "https://api.themoviedb.org/3/search/movie"
     params = {
         "api_key": TMDB_API_KEY,
@@ -26,7 +27,7 @@ async def search_movie_tmdb(keyword):
         "url": f"https://sampledomain.com/?q={quote(movie['title'])}&type=movie"
     }
 
-async def search_actor_tmdb(name):
+def search_actor_tmdb(name):
     url = "https://api.themoviedb.org/3/search/person"
     params = {
         "api_key": TMDB_API_KEY,
@@ -43,14 +44,14 @@ async def search_actor_tmdb(name):
         "url": f"https://sampledomain.com/?q={quote(actor['name'])}&type=actor"
     }
 
-async def recommend_by_genres_wrap(genres, keywords):
+def recommend_by_genres_wrap(genres, keywords):
     result = recommend_by_genres(genres, keywords)
     for movie in result:
         movie["url"] = f"https://sampledomain.com/?q={quote(movie['title'])}&type=movie"
     return result
 
 # --- Core Chat Logic ---
-async def call_bot(messages):
+def call_bot(messages):
     if len(messages) > 20:
         messages = messages[-20:]
     if len(messages) == 0:
@@ -138,24 +139,29 @@ async def call_bot(messages):
     res = requests.post(url, headers=headers, json=payload)
     return res.json()
 
+def sio_emit(sio, loop, event, data, to):
+    try:
+        asyncio.run_coroutine_threadsafe(sio.emit(event, data, to=to), loop)
+    except Exception as e:
+        logger.error(f"Error in sio_emit: {str(e)}")
 
-async def user_uttered_handle(sio, sid, data):
+def user_uttered_handle(sio, loop, sid, data):
     try:
         text = data.get("message")
 
         # if text starts with "/greet", just return greet data.
         if text.startswith("/greet"):
-            await sio.emit("bot_uttered", {"text": "Hello! I am The Movie Master. You can ask me about movies, actors, or for recommendations.\n- Use `/help` to display all the available commands."}, to=sid)
+            sio_emit(sio, loop, "bot_uttered", {"text": "Hello! I am The Movie Master. You can ask me about movies, actors, or for recommendations.\n""- Use `/help` to display all the available commands."}, to=sid)
             return
         if text.startswith("/help"):
-            await sio.emit("bot_uttered", {"text": "Available commands:\n- `/greet`: to display greeting message.\n- `/clear`: to clear the chatting context."}, to=sid)
+            sio_emit(sio, loop, "bot_uttered", {"text": "Available commands:\n- `/greet`: to display greeting message.\n- `/clear`: to clear the chatting context."}, to=sid)
             return
         if text.startswith("/clear"):
             user_sessions.pop(sid, None)
-            await sio.emit("bot_uttered", {"text": "Context cleared successfully."}, to=sid)
+            sio_emit(sio, loop, "bot_uttered", {"text": "Context cleared successfully."}, to=sid)
             return
         if text.startswith("/"):
-            await sio.emit("bot_uttered", {"text": "Unknown command. Use `/help` to display all the available commands."}, to=sid)
+            sio_emit(sio, loop, "bot_uttered", {"text": "Unknown command. Use `/help` to display all the available commands."}, to=sid)
             return
 
         session_id = data.get("session_id", sid)
@@ -166,13 +172,13 @@ async def user_uttered_handle(sio, sid, data):
         call_loops = 0
         while True:
             print("Sending messages to MCP API: ", messages)
-            reply_json = await call_bot(messages)
+            reply_json = call_bot(messages)
             choice = reply_json["choices"][0]["message"]
             # 如果是 tool_call
             if len(choice.get("tool_calls", [])) > 0:
                 if call_loops > 5:
                     logger.error("Too many tool calls detected, breaking the loop.")
-                    await sio.emit("bot_uttered",
+                    sio_emit(sio, loop, "bot_uttered",
                                    {"text": "Sorry, we are encountering some technical issues. Please try again."},
                                    to=sid)
                     return
@@ -187,8 +193,8 @@ async def user_uttered_handle(sio, sid, data):
                     args = json.loads(tool_call["function"]["arguments"])
 
                     if tool_name in TOOL_FUNCTIONS:
-                        await sio.emit("bot_uttered", {"text": TOOL_FUNCTIONS[tool_name]["working"]}, to=sid)
-                        result = await TOOL_FUNCTIONS[tool_name]["func"](**args)
+                        sio_emit(sio, loop, "bot_uttered", {"text": TOOL_FUNCTIONS[tool_name]["working"]}, to=sid)
+                        result = TOOL_FUNCTIONS[tool_name]["func"](**args)
                         print(f"Tool call result: {result}")
                         messages.append({
                             "role": "tool",
@@ -216,10 +222,10 @@ async def user_uttered_handle(sio, sid, data):
         # remove the 'https://sampledomain.com' part from the text
         final_text = final_text.replace("https://sampledomain.com", "")
 
-        await sio.emit("bot_uttered", {"text": final_text}, to=sid)
+        sio_emit(sio, loop, "bot_uttered", {"text": final_text}, to=sid)
     except Exception as e:
         logger.error(f"Error in user_uttered: {str(e)}")
-        await sio.emit("bot_uttered", {"text": "Sorry, we are encountering some technical issues, please retry later."}, to=sid)
+        sio_emit(sio, loop, "bot_uttered", {"text": "Sorry, we are encountering some technical issues, please retry later."}, to=sid)
 
 
 # Tool registry

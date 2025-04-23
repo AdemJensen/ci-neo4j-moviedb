@@ -549,7 +549,7 @@ async def session_request(sid, data):
 @sio.event
 async def user_uttered(sid, data):
     loop = asyncio.get_event_loop()
-    loop.create_task(user_uttered_handle(sio, sid, data))
+    loop.run_in_executor(None, user_uttered_handle, sio, loop, sid, data)
     print(f"User uttered: {data}, handle is over.")
 
 if __name__ == "__main__":
