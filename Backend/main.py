@@ -1,6 +1,8 @@
+from recommendation import recommend_by_tmdb_movies
 from neo4j import add_movie_to_neo4j
 from tmdb import fetch_movie_from_tmdb
 from tmdb import fetch_actor_from_tmdb
+from tmdb import get_favorite_movies as get_favorite_movies_tmdb
 from neo4j import add_actor_to_neo4j
 from config import *
 from models import *
@@ -14,7 +16,6 @@ import requests
 import httpx
 from datetime import datetime
 from pathlib import Path
-import recommendation
 
 app = FastAPI()
 
@@ -455,7 +456,7 @@ async def health_check():
 @app.post("/seed/actors")
 async def seed_actors():
     from seed_actors import seed_actors as seed_actors_func
-    await seed_actors_func()
+    return await seed_actors_func()
 
 @app.get("/tmdb/request-token")
 async def request_token():
@@ -506,27 +507,20 @@ async def get_rated_movies(session_id: str):
         return rated_res.json()
 
 
-# FastAPI backend
 @app.get("/tmdb/favorites")
 async def get_favorite_movies(session_id: str, page: int = Query(1, ge=1)):
-    async with httpx.AsyncClient() as client:
-        # Step 1: Get account_id
-        account_res = await client.get(
-            f"https://api.themoviedb.org/3/account",
-            params={"api_key": TMDB_API_KEY, "session_id": session_id}
-        )
-        account_data = account_res.json()
-        account_id = account_data["id"]
+    return await get_favorite_movies_tmdb(session_id, page)
 
-        # Step 2: Get favorite movies
-        fav_res = await client.get(
-            f"https://api.themoviedb.org/3/account/{account_id}/favorite/movies",
-            params={"api_key": TMDB_API_KEY, "session_id": session_id, "page": page, "sort_by": "created_at.desc"}
-        )
-        # print(fav_res.json())
-        return fav_res.json()
-
-
+@app.get("/recommendations")
+async def get_favorite_movies(session_id: str):
+    favorite_movies = await get_favorite_movies_tmdb(session_id, 1)
+    # for each movie, get id
+    tmdb_ids = [movie["id"] for movie in favorite_movies["results"]]
+    res = recommend_by_tmdb_movies(tmdb_ids)
+    print("Recommended movies:", res)
+    return {
+        "results": res,
+    }
 
 # Update root endpoint
 @app.get("/", response_class=HTMLResponse)

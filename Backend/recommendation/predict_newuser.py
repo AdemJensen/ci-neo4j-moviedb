@@ -1,4 +1,4 @@
-from model_based_cf import SVDRecommender
+from .model_based_cf import SVDRecommender
 import pandas as pd
 import re
 

@@ -1,3 +1,4 @@
+from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import TruncatedSVD
@@ -16,7 +17,7 @@ class SVDRecommender:
         self.movie_enc = LabelEncoder()
         self.movie_ids = None
         self.movies_df = None
-        self.original_ratings = pd.read_csv("./TheMoviesDataset/ratings.csv")
+        self.original_ratings = pd.read_csv(Path(__file__).parent / "TheMoviesDataset/ratings.csv")
 
     def train(self, ratings_df, movies_df):
         self.movies_df = movies_df

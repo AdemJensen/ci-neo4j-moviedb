@@ -47,19 +47,22 @@ export default function FavoritesPage() {
         <div className="min-h-screen bg-gray-100">
             <Navbar/>
             <div className="p-8">
-                <Card className="max-w-6xl mx-auto cursor-pointer ">
+                <Card className="max-w-6xl mx-auto">
                     <CardHeader>
                         <h1 className="text-2xl font-bold">🌟 Favorite Movies</h1>
                     </CardHeader>
                     <CardContent>
                         {loading ? (
-                            <p className="text-center text-gray-500">Loading...</p>
+                            <div className="flex flex-col justify-center items-center h-96">
+                                <p className="text-gray-700 text-lg mb-4">Fetching from TMDB...</p>
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                            </div>
                         ) : favorites.length === 0 ? (
                             <p className="text-center text-gray-500">No favorites found.</p>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
                                 {favorites.map((movie) => (
-                                    <Card key={movie.id} className="bg-white shadow hover:shadow-md transition"
+                                    <Card key={movie.id} className="bg-white shadow hover:shadow-md transition cursor-pointer"
                                         onClick={() => handleNavigation(`/?q=${encodeURIComponent(movie.title)}&type=movie`)}>
                                         <CardContent className="p-3">
                                             {movie.poster_path ? (
