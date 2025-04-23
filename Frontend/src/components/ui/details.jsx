@@ -55,8 +55,9 @@ const DetailsCard = ({ data, type, onDataUpdate }) => {
   const updateActorData = async (actorName) => {
     setIsUpdatingActor(true);
     try {
-      const updateResponse = await apiService.putData(
-        `/actor/update/${encodeURIComponent(actorName)}`
+      const updateResponse = await apiService.postData(
+        `/actors_update/${encodeURIComponent(actorName)}`,
+          { "name": actorName, "actor": null, "manually": false }
       );
       
       if (updateResponse.ok) {
@@ -68,6 +69,27 @@ const DetailsCard = ({ data, type, onDataUpdate }) => {
     } catch (error) {
       console.error('Error updating actor data:', error);
       showNotification('Failed to update actor information', 'error');
+    } finally {
+      setIsUpdatingActor(false);
+    }
+  };
+
+  const updateMovieData = async (movieTitle) => {
+    setIsUpdatingActor(true);
+    try {
+      const updateResponse = await apiService.postData(
+        `/add_movie_from_tmdb/${encodeURIComponent(movieTitle)}`,
+          {  }
+      );
+
+      if (updateResponse.ok) {
+        showNotification('Movie information updated successfully, please refresh the page.');
+      } else {
+        throw new Error('Failed to update movie information');
+      }
+    } catch (error) {
+      console.error('Error updating movie data:', error);
+      showNotification('Failed to update movie information', 'error');
     } finally {
       setIsUpdatingActor(false);
     }
@@ -191,7 +213,7 @@ const DetailsCard = ({ data, type, onDataUpdate }) => {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <h2 className="text-2xl font-bold">{actor.name}</h2>
-                      {!imageUrl && !isUpdatingActor && (
+                      {!isUpdatingActor && (
                         <button 
                           onClick={() => updateActorData(actor.name)}
                           className="px-2 py-1 text-xs text-gray-600 hover:text-gray-900 flex items-center gap-1
@@ -201,10 +223,15 @@ const DetailsCard = ({ data, type, onDataUpdate }) => {
                           Update
                         </button>
                       )}
+                      {isUpdatingActor && (
+                          <div className="animate-spin">
+                            <RefreshCw className="w-4 h-4 text-gray-400"/>
+                          </div>
+                      )}
                     </div>
                     <div className="space-y-1 text-sm">
                       {actor.gender && (
-                        <p className="text-gray-600">
+                          <p className="text-gray-600">
                           <span className="font-medium">Gender:</span> {actor.gender}
                         </p>
                       )}
@@ -284,10 +311,29 @@ const DetailsCard = ({ data, type, onDataUpdate }) => {
             <div className="flex-1">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h2 className="text-2xl font-bold mb-2">{movie.title}</h2>
+                  <div className="flex items-center gap-2">
+
+                  <h2 className="text-2xl font-bold mb-2">{movie.title} </h2>
+                    {!isUpdatingActor && (
+                    <button
+                      onClick={() => updateMovieData(movie.title)}
+                      className="px-2 py-1 text-xs text-gray-600 hover:text-gray-900 flex items-center gap-1
+                               bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      Update
+                    </button>
+                  )}
+                    {isUpdatingActor && (
+                        <div className="animate-spin">
+                          <RefreshCw className="w-4 h-4 text-gray-400"/>
+                        </div>
+                    )}
+                  </div>
+
                   <div className="space-y-1">
                     {movie.year && (
-                      <p className="text-gray-600">
+                        <p className="text-gray-600">
                         <span className="font-medium">Release Year:</span> {movie.year}
                       </p>
                     )}

@@ -221,7 +221,7 @@ async def delete_movie(title: str):
 
 
 @app.post("/add_movie_from_tmdb/{movie_title}")
-async def add_actor_from_tmdb(movie_title: str):
+async def add_movie_from_tmdb(movie_title: str):
     try:
         movie_data = fetch_movie_from_tmdb(movie_title)
         if movie_data:
@@ -319,73 +319,35 @@ async def get_actor_filmography(name: str):
     }
 
 
-@app.put("/actors/{name}", response_model=Actor)
-async def update_actor(name: str, actor: Optional[Actor] = None):
+@app.post("/actors_update/{name}")
+async def update_actor(name: str, actor: Optional[Actor] = None, manually: bool = False):
     try:
+        # Step 1: Fetch the existing actor node
         actor_node = matcher.match("Actor", name=name).first()
         if not actor_node:
             raise HTTPException(status_code=404, detail="Actor not found")
 
-        if actor:
-            # Update with provided data
-            actor_node.update(**actor.dict(exclude_unset=True))
+        # Step 2: If actor info is provided manually, update from request body
+        if actor and manually:
+            updates = actor.dict(exclude_unset=True)
+            actor_node.update(**updates)
             graph.push(actor_node)
-        else:
-            # Update from TMDB
-            # Search for actor in TMDB
-            search_url = f"{TMDB_BASE_URL}/search/person"
-            params = {
-                "api_key": TMDB_API_KEY,
-                "query": name
-            }
-            response = requests.get(search_url, params=params)
-            data = response.json()
+            logging.info(f"Actor manually updated: {name}")
+            return {"message": "Actor updated successfully", "data": updates}
 
-            if not data["results"]:
-                return {"message": "No updates available from TMDB"}
-
-            actor_data = data["results"][0]
-            actor_id = actor_data["id"]
-
-            # Fetch detailed actor info
-            details_url = f"{TMDB_BASE_URL}/person/{actor_id}"
-            params = {
-                "api_key": TMDB_API_KEY,
-                "append_to_response": "movie_credits"
-            }
-            details_response = requests.get(details_url, params=params)
-            actor_details = details_response.json()
-
-            # Update actor in Neo4j
-            cypher_query = """
-            MATCH (a:Actor {name: $name})
-            SET a.profile_path = $profile_path,
-                a.gender = CASE WHEN $gender = 2 THEN 'Male' WHEN $gender = 1 THEN 'Female' ELSE a.gender END,
-                a.date_of_birth = COALESCE($birthday, a.date_of_birth),
-                a.date_of_death = COALESCE($deathday, a.date_of_death)
-            RETURN a
-            """
-
-            result = graph.run(cypher_query, {
-                'name': name,
-                'profile_path': actor_data.get('profile_path'),
-                'gender': actor_details.get('gender'),
-                'birthday': actor_details.get('birthday'),
-                'deathday': actor_details.get('deathday')
-            }).data()
-
-            if result:
-                logging.info(f"Actor updated from TMDB: {name}")
-                return {
-                    "message": "Actor updated successfully",
-                    "data": result[0]['a']
-                }
-
-            return {"message": "No updates available"}
+        # Step 3: Otherwise, attempt to update from TMDB
+        return await add_actor_from_tmdb(name)
+        #
+        # if result:
+        #     updated_actor = result[0]["a"]
+        #     logging.info(f"Actor updated from TMDB: {name}")
+        #     return {"message": "Actor updated from TMDB", "data": dict(updated_actor)}
+        #
+        # return {"message": "Actor found in TMDB but no data to update"}
 
     except Exception as e:
-        logging.error(f"Error updating actor: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error(f"Error updating actor '{name}': {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 @app.get("/movies/{title}/cast")
