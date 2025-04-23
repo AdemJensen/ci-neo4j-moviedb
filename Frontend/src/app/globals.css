@@ -94,3 +94,11 @@
   color: blue;
   text-decoration: underline;
 }
+
+.rw-launcher {
+  background: black !important;
+}
+
+.rw-header {
+  background: black !important;
+}

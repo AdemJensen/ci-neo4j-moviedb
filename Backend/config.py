@@ -15,8 +15,8 @@ TMDB_BASE_URL = os.getenv("TMDB_BASE_URL", "https://api.themoviedb.org/3")
 PORT = os.getenv("PORT",10000)
 
 SILICONFLOW_SK = os.getenv("SILICONFLOW_SK", "")
-# SILICONFLOW_MODEL = os.getenv("SILICONFLOW_MODEL", "THUDM/glm-4-9b-chat")
-SILICONFLOW_MODEL = os.getenv("SILICONFLOW_MODEL", "Pro/deepseek-ai/DeepSeek-V3")
+SILICONFLOW_MODEL = os.getenv("SILICONFLOW_MODEL", "THUDM/glm-4-9b-chat")
+# SILICONFLOW_MODEL = os.getenv("SILICONFLOW_MODEL", "Pro/deepseek-ai/DeepSeek-V3")
 
 # Connect to Neo4j
 graph = Graph(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD),name="neo4j")

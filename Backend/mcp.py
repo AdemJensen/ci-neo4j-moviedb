@@ -63,8 +63,9 @@ def call_bot(messages):
                        "you should use the search_movie or search_actor function to search and get the details page"
                        " and provide the user with links. "
                        "If the user asks for a recommendation, "
-                       "you should ask for genres and keywords from user, and then use the recommend_by_genres"
-                       " function to get the recommendation."
+                       "you should ask for genres and keywords from user first, and then use the recommend_by_genres"
+                       " function to get the recommendation. DO NOT recommend without knowing genres and keywords."
+                       "When you display any movie or actor, please provide a link to the details page."
         })
         messages.append({
             "role": "assistant",
